@@ -35,8 +35,8 @@ export default function InfoPage({ address, onSubmit }) {
         background: "rgba(255,255,255,0.72)",
         backdropFilter: "blur(8px)",
         borderRadius: 16,
-        padding: "32px 36px 28px",
-        width: 480,
+        padding: "42px 48px 42px",
+        width: 660,
         boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
         maxHeight: "90vh", overflowY: "auto",
       }}>
