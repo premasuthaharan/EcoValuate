@@ -18,6 +18,7 @@ export const inputStyle = {
   border: "1px solid rgba(0,0,0,0.15)",
   background: "rgba(255,255,255,0.7)",
   fontSize: 13,
+  fontFamily: "var(--font-ui)",
   outline: "none",
   width: "100%",
   boxSizing: "border-box",

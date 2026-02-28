@@ -47,7 +47,7 @@ export default function AddressSearch({ onGo }) {
             placeholder="123 Main St, City, State"
             style={{
               ...inputStyle,
-              width: 280,
+              width: 470,
               paddingRight: query ? 30 : 10,
               background: "rgba(255,255,255,0.85)",
             }}
@@ -78,7 +78,7 @@ export default function AddressSearch({ onGo }) {
         <div style={{
           position: "absolute", top: "calc(100% + 4px)", left: 0,
           background: "#fff", borderRadius: 8, boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-          zIndex: 100, width: 280, overflow: "hidden",
+          zIndex: 100, width: 470, overflow: "hidden",
         }}>
           {suggestions.map((s, i) => (
             <div

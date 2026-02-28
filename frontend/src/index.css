@@ -11,6 +11,8 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --font-brand: "Sora", sans-serif;
+  --font-ui: "Plus Jakarta Sans", sans-serif;
 }
 
 a {
@@ -28,6 +30,9 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1 {
