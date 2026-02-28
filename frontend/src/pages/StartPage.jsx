@@ -4,7 +4,7 @@ import { BG_URL } from "../constants";
 export default function StartPage({ onGo }) {
   return (
     <div style={{
-      width: "100%", height: "100vh", position: "relative",
+      width: "100vw", height: "100vh", position: "relative",
       backgroundImage: `url(${BG_URL})`,
       backgroundSize: "cover", backgroundPosition: "center",
       display: "flex", flexDirection: "column",

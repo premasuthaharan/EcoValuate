@@ -24,7 +24,7 @@ export default function InfoPage({ address, onSubmit }) {
 
   return (
     <div style={{
-      width: "100%", height: "100vh", position: "relative",
+      width: "100vw", height: "100vh", position: "relative",
       backgroundImage: `url(${BG_URL2})`,
       backgroundSize: "cover", backgroundPosition: "center",
       display: "flex", alignItems: "center", justifyContent: "center",

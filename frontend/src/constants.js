@@ -9,7 +9,7 @@ export const MOCK_SUGGESTIONS = [
   "222 Walnut Way, New York, NY 10001",
 ];
 
-export const BG_URL = "https://images.unsplash.com/photo-1448375240586-882707db888b?w=1600&q=80";
+export const BG_URL = "/bg1.png";
 export const BG_URL2 = "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80";
 
 export const inputStyle = {

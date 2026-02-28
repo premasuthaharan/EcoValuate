@@ -3,7 +3,7 @@ import { BG_URL } from "../constants";
 export default function ResultsPage({ data }) {
   return (
     <div style={{
-      width: "100%", height: "100vh",
+      width: "100vw", height: "100vh",
       backgroundImage: `url(${BG_URL})`,
       backgroundSize: "cover", backgroundPosition: "center",
       display: "flex", alignItems: "center", justifyContent: "center",
