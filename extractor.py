@@ -1,5 +1,4 @@
 """Extracts normalized metadata from HomeHarvest property objects.
-If some values are None, asks for user input.
 
 The goal is to produce a small dictionary of predictable inputs for
 downstream climate/estimation code.
@@ -121,3 +120,35 @@ def extract_basic_metadata(prop: Any) -> Dict[str, Optional[object]]:
     #logger.debug("Extracted metadata: %s", metadata)
     print(f"Extracted metadata: {metadata}")
     return metadata
+
+# Ask for:
+# - average monthly electric/gas bill
+# - Type of heating fuel
+# - What temperature do you keep the house during the winter/summer
+# - Have you added attic insulation in the last 10 years
+# - Have you added triple-pane windows in the last 10 years
+def get_user_input():
+    kWh = None
+    fuel = None
+    insul = None
+    trip_windows = None
+    print("Average monthly electricity usage from eletricity bill (kWh): ")
+    kWh = input()
+    if (kWh == ""):
+        kWh = None
+        print("Type of heating fuel: ")
+        fuel = input()
+        if (fuel == ""): fuel = None
+        print("Attic insulation within past 10 years: ")
+        insul = input()
+        if (insul == ""): insul = None
+        print("Triple-pane windows within past 10 years: ")
+        trip_windows = input()
+        if (trip_windows == ""): trip_windows = None
+    else: kWh = int(kWh)
+    return {
+        "electricity": kWh,
+        "inferred_fuel": fuel,
+        "insulation": insul,
+        "triple_windows": trip_windows,
+    }

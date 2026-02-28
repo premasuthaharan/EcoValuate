@@ -12,8 +12,11 @@ from typing import Any, Dict
 
 from homeharvest_client import scrape_address
 from extractor import extract_basic_metadata
+from extractor import get_user_input
 from climate import get_climate_metrics
 from calculator import compute_derived_inputs
+from calculator import estimate_carbon_footprint
+from calculator import calculate_size_adjusted_score
 
 '''
 logging.basicConfig(level=logging.INFO)
@@ -35,11 +38,14 @@ def run_workflow(address: str) -> Dict[str, Any]:
     climate = get_climate_metrics(lat, lon)
 
     derived = compute_derived_inputs(metadata, climate)
-
-    output = {"metadata": metadata, "climate": climate, "derived": derived}
+    derived.update(get_user_input())
+    #output = {"metadata": metadata, "climate": climate, "derived": derived}
     #logger.info("Workflow completed for %s", address)
-    print("Workflow completed for %s" % address)
-    return output
+    #print("Workflow completed for %s" % address)
+    print("DERIVED")
+    print(derived)
+    score = estimate_carbon_footprint(metadata, climate)
+    return score
 
 
 if __name__ == "__main__":
