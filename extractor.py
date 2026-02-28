@@ -1,4 +1,5 @@
 """Extracts normalized metadata from HomeHarvest property objects.
+If some values are None, asks for user input.
 
 The goal is to produce a small dictionary of predictable inputs for
 downstream climate/estimation code.
