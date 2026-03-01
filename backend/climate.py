@@ -41,7 +41,7 @@ def get_climate_metrics(lat: float, lon: float, years_back: int = 1) -> Dict[str
         resp.raise_for_status()
         data = resp.json()
     except Exception as e:
-        logger.exception("Weather API error")
+        # logger.exception("Weather API error")
         return {"error": f"Weather API error: {e}"}
 
     if "daily" not in data or "temperature_2m_mean" not in data.get("daily", {}):

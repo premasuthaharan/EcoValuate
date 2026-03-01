@@ -24,12 +24,6 @@ from inferences import estimate_fuel_mix
 from inferences import infer_attic_insulation
 from inferences import infer_triple_pane_windows
 
-
-'''
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-'''
-
 def run_workflow(address: str) -> Dict[str, Any]:
     """Run the data-gathering and feature-prep workflow for a single address.
 
@@ -73,7 +67,7 @@ def run_workflow(address: str) -> Dict[str, Any]:
     #print("Workflow completed for %s" % address)
     
     score = estimate_carbon_footprint(metadata, climate, derived)
-    return {"metadata": metadata, "climate": climate, "derived": derived, "score": score}
+    return {"metadata": metadata, "climate": climate, "derived": derived}
 
 '''
 if __name__ == "__main__":
