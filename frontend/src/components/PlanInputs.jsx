@@ -77,7 +77,7 @@ export default function PlanInputs({ budget, years, priority, errors, onBudgetCh
       {/* Centered button */}
       <div style={{ display: "flex", justifyContent: "center" }}>
         <button style={generateBtnStyle} onClick={onGenerate}>
-          <span>✓</span> Generate Plan
+          Generate Plan
         </button>
       </div>
     </div>
@@ -102,8 +102,7 @@ const errorStyle = {
 };
 
 const generateBtnStyle = {
-  padding: "13px 36px", paddingLeft: 32, background: ACCENT_COLOR, color: "#fff",
+  padding: "13px 36px", background: ACCENT_COLOR, color: "#fff",
   border: "none", borderRadius: 28, fontWeight: 600, fontSize: 16,
-  cursor: "pointer", display: "flex", alignItems: "center", gap: 10,
-  transition: "background 0.2s", whiteSpace: "nowrap",
+  cursor: "pointer", transition: "background 0.2s", whiteSpace: "nowrap",
 };

@@ -36,7 +36,7 @@ export default function InfoPage({ address, loadData, onSubmit, onBack }) {
     if (!form.yearBuilt) errs.yearBuilt = "Year built is required.";
     if (!form.lat) errs.lat = "Latitude is required.";
     if (!form.lon) errs.lon = "Longitude is required.";
-    if (form.stories && (!/^\d+$/.test(form.stories) || Number(form.stories) <= 0))
+    if (!form.stories || !/^\d+$/.test(form.stories) || Number(form.stories) <= 0)
       errs.stories = "Must be a positive whole number.";
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setErrors({});
@@ -55,7 +55,7 @@ export default function InfoPage({ address, loadData, onSubmit, onBack }) {
     };
     const updatedDerived = {
       ...loadData.data.derived,
-      inferred_fuel: form.fuelSource === "gas" ? "natural_gas" : form.fuelSource,
+      ...(form.fuelSource ? { inferred_fuel: form.fuelSource === "gas" ? "natural_gas" : form.fuelSource } : {}),
     };
     const updatedHomeData = { ...loadData.data, metadata: updatedMetadata, derived: updatedDerived };
 
@@ -250,16 +250,15 @@ export default function InfoPage({ address, loadData, onSubmit, onBack }) {
             onMouseEnter={() => setSubmitHover(true)}
             onMouseLeave={() => setSubmitHover(false)}
             style={{
-              padding: "13px 30px", paddingLeft: 22,
+              padding: "13px 30px",
               background: submitted ? "#888" : ACCENT_COLOR,
               color: "#fff", border: "none", borderRadius: 28,
               fontWeight: 600, fontSize: 16, cursor: "pointer",
-              display: "flex", alignItems: "center", gap: 10,
               transition: "background 0.2s, box-shadow 0.2s", whiteSpace: "nowrap",
               boxShadow: submitHover && !submitted ? "0 6px 18px rgba(0,0,0,0.22)" : "none",
             }}
           >
-            <span>✓</span> {submitted ? "Submitted!" : "Submit"}
+            {"Submit"}
           </button>
         </div>
       </div>
