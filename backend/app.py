@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from workflow import run_workflow
 import traceback
+import os
 from flask_cors import CORS
 from generate_plan import generate_renovation_plan
 from calculator import estimate_carbon_footprint
@@ -97,5 +98,5 @@ def get_plan():
         print(f"Planner Error: {traceback.format_exc()}")
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    app.run()
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
