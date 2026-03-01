@@ -47,6 +47,8 @@ export const TIMELINE = [
 
 export const TREES_PER_STEP = 3;
 
+export const API_BASE = import.meta.env.VITE_BACKEND_URL ?? "http://127.0.0.1:2000";
+
 export const ACCENT_COLOR = "#593a2a";
 export const DARK_GREEN_COLOR = "#4a7c59";
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Field from "../components/Field";
 import Toggle from "../components/Toggle";
-import { BG_URL2, inputStyle, ACCENT_COLOR } from "../constants";
+import { BG_URL2, inputStyle, ACCENT_COLOR, API_BASE } from "../constants";
 
 const clouds = [
   { top: "8vh", left: "8vw", width: "20vw", opacity: 0.80 },
@@ -59,7 +59,7 @@ export default function InfoPage({ address, loadData, onSubmit, onBack }) {
     };
     const updatedHomeData = { ...loadData.data, metadata: updatedMetadata, derived: updatedDerived };
 
-    const estimateJson = await fetch("http://127.0.0.1:2000/api/estimate", {
+    const estimateJson = await fetch(`${API_BASE}/api/estimate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ home_data: updatedHomeData }),

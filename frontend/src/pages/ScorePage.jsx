@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BG_URL3 } from "../constants";
+import { BG_URL3, API_BASE } from "../constants";
 import ScoreSlider from "../components/ScoreSlider";
 import PlanInputs from "../components/PlanInputs";
 
@@ -51,7 +51,7 @@ export default function ScorePage({ loadData, onPlanGenerate, onBack }) {
     setErrors({});
     setLoading(true);
 
-    const planJson = await fetch("http://127.0.0.1:2000/api/plan", {
+    const planJson = await fetch(`${API_BASE}/api/plan`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

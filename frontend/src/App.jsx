@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_BASE } from "./constants";
 import GraphPage from "./pages/GraphPage";
 import StartPage from "./pages/StartPage";
 import InfoPage from "./pages/InfoPage";
@@ -16,7 +17,7 @@ export default function App() {
   async function handleGo(a) {
     setAddress(a);
     setLoading(true);
-    const json = await fetch("http://127.0.0.1:2000/api/load", {
+    const json = await fetch(`${API_BASE}/api/load`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ address: a }),
