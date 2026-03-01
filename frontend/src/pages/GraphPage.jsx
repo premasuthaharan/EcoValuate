@@ -1,7 +1,83 @@
 import { useState } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-export default function GraphPage({ onBack }) {
+function buildCostProjection(loadData) {
+  const currentYear = new Date().getFullYear();
+  const metadata = loadData?.data?.metadata || {};
+  const climate  = loadData?.data?.climate  || {};
+  const derived  = loadData?.data?.derived  || {};
+
+  const sqft       = metadata.size_sqft  || 2000;
+  const hdd        = climate.annual_hdd  || 4000;
+  const cdd        = climate.annual_cdd  || 1000;
+  const age        = metadata.age_years  || 20;
+  const fuel       = derived.inferred_fuel || "gas";
+  const insulation = derived.insulation ?? 0.7;
+  const stories    = derived.stories || 1;
+
+  // Mirror calculator.py multipliers
+  const ageMult        = age > 45 ? 1.3 : 1.0;
+  const storyMult      = stories === 1 ? 1.15 : 0.90;
+  const insulCredit    = insulation > 0.6 ? 0.85 : 1.0;
+
+  const heatBtu = sqft * hdd * 18 * ageMult * storyMult * insulCredit;
+  const coolBtu = sqft * cdd * 12 * ageMult * storyMult;
+
+  const elecPrice = 0.15; // $/kWh
+  let heatCost = 0;
+  if      (fuel === "oil")      heatCost = (heatBtu / 138500) * 3.50;
+  else if (fuel === "propane")  heatCost = (heatBtu / 91500)  * 2.50;
+  else if (fuel === "electric") heatCost = (heatBtu / (3412 * 2.5)) * elecPrice;
+  else                          heatCost = (heatBtu / 100000) * 1.40; // gas
+
+  const coolCost = (coolBtu / (3412 * 3.0)) * elecPrice;
+  const baseload = 1500; // avg US household appliances/lights
+
+  const baseCost = heatCost + coolCost + baseload;
+
+  // Inflation: fossil fuels rise faster; electric grid gets cheaper
+  const inflation = fuel === "oil" ? 0.055 : fuel === "gas" ? 0.045 : 0.03;
+  const aging     = 0.012; // systems degrade ~1.2%/yr
+
+  return Array.from({ length: 16 }, (_, i) => ({
+    year: currentYear + i,
+    cost: Math.round(baseCost * Math.pow(1 + inflation + aging, i)),
+  }));
+}
+
+function buildProjection(baseScore, loadData) {
+  const currentYear = new Date().getFullYear();
+  const metadata = loadData?.data?.metadata || {};
+  const derived = loadData?.data?.derived || {};
+
+  // Base decay: well-maintained modern home loses ~0.4/yr
+  let decayRate = 0.4;
+
+  // Older homes deteriorate faster (materials, systems aging)
+  const age = metadata.age_years || 0;
+  decayRate += Math.min(age / 80, 0.5);
+
+  // Fossil fuel homes get penalized more as the grid gets cleaner
+  const fuel = derived.inferred_fuel;
+  if (fuel === "oil")      decayRate += 0.4;
+  else if (fuel === "gas") decayRate += 0.2;
+  else if (fuel === "electric") decayRate -= 0.15; // grid greening helps electric homes
+
+  // Poor insulation accelerates decay
+  if ((derived.insulation ?? 1) < 0.4) decayRate += 0.2;
+
+  decayRate = Math.max(0.1, decayRate); // floor at 0.1/yr
+
+  return Array.from({ length: 16 }, (_, i) => ({
+    year: currentYear + i,
+    score: Math.max(0, Math.round(baseScore - i * decayRate)),
+  }));
+}
+
+export default function GraphPage({ onBack, loadData }) {
+  console.log("=== loadData on GraphPage ===", JSON.stringify(loadData, null, 2));
   const [activeTab, setActiveTab] = useState("footprint");
+  const baseScore = loadData?.data?.past?.eco_score;
   const [backHover, setBackHover] = useState(false);
 
   const tabs = [
@@ -73,14 +149,40 @@ export default function GraphPage({ onBack }) {
             justifyContent: "center",
           }}>
             {activeTab === "footprint" && (
-              <p style={{ fontFamily: "var(--font-ui)", color: "#555", fontSize: 15 }}>
-                Expected Footprint content goes here.
-              </p>
+              baseScore != null ? (
+                <div style={{ width: "100%", padding: "24px 16px" }}>
+                  <p style={{ fontFamily: "var(--font-ui)", color: "#333", fontWeight: 700, fontSize: 14, marginBottom: 12, textAlign: "center" }}>
+                    Eco Score Projection (next 15 years)
+                  </p>
+                  <ResponsiveContainer width="100%" height={260}>
+                    <LineChart data={buildProjection(baseScore, loadData)} margin={{ top: 8, right: 24, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
+                      <XAxis dataKey="year" tick={{ fontFamily: "var(--font-ui)", fontSize: 12 }} />
+                      <YAxis domain={[0, 100]} tick={{ fontFamily: "var(--font-ui)", fontSize: 12 }} />
+                      <Tooltip formatter={(v) => [`${v} / 100`, "Eco Score"]} />
+                      <Line type="monotone" dataKey="score" stroke="#4a7c59" strokeWidth={2.5} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p style={{ fontFamily: "var(--font-ui)", color: "#888", fontSize: 14 }}>Loading score…</p>
+              )
             )}
             {activeTab === "graph" && (
-              <p style={{ fontFamily: "var(--font-ui)", color: "#555", fontSize: 15 }}>
-                Graph content goes here.
-              </p>
+              <div style={{ width: "100%", padding: "24px 16px" }}>
+                <p style={{ fontFamily: "var(--font-ui)", color: "#333", fontWeight: 700, fontSize: 14, marginBottom: 12, textAlign: "center" }}>
+                  Projected Annual Energy Cost (next 15 years)
+                </p>
+                <ResponsiveContainer width="100%" height={260}>
+                  <LineChart data={buildCostProjection(loadData)} margin={{ top: 8, right: 24, left: 8, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
+                    <XAxis dataKey="year" tick={{ fontFamily: "var(--font-ui)", fontSize: 12 }} />
+                    <YAxis tickFormatter={(v) => `$${v.toLocaleString()}`} tick={{ fontFamily: "var(--font-ui)", fontSize: 12 }} />
+                    <Tooltip formatter={(v) => [`$${v.toLocaleString()}`, "Annual Cost"]} />
+                    <Line type="monotone" dataKey="cost" stroke="#c0392b" strokeWidth={2.5} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             )}
           </div>
         </div>
