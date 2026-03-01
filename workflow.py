@@ -16,7 +16,14 @@ from extractor import get_user_input
 from climate import get_climate_metrics
 from calculator import compute_derived_inputs
 from calculator import estimate_carbon_footprint
-from calculator import calculate_size_adjusted_score
+from calculator import get_neighborhood_stats
+from calculator import get_grid_intensity
+from calculator import get_solar_potential
+from calculator import get_transit_score
+from inferences import estimate_fuel_mix
+from inferences import infer_attic_insulation
+from inferences import infer_triple_pane_windows
+
 
 '''
 logging.basicConfig(level=logging.INFO)
@@ -38,13 +45,34 @@ def run_workflow(address: str) -> Dict[str, Any]:
     climate = get_climate_metrics(lat, lon)
 
     derived = compute_derived_inputs(metadata, climate)
-    derived.update(get_user_input())
+    print(metadata)
+    #update derived with inputs
+    inputs = get_user_input()
+    temp = derived["stories"]
+    derived.update(inputs)
+    if temp is not None:
+        if derived["stories"] is None: derived["stories"] = temp
+    else:
+        if derived["stories"] is None: derived["stories"] = 1
+    
+    #update derived with inferences
+    if (derived["inferred_fuel"] is None): 
+        fuel_mix = estimate_fuel_mix(metadata["year_built"], metadata["state"])
+        derived["inferred_fuel"] = max(fuel_mix, key = fuel_mix.get)
+    avgpps = get_neighborhood_stats(metadata["zip_code"])
+    if (derived["insulation"] is None): 
+        derived["insulation"] = infer_attic_insulation(metadata["year_built"], metadata["price_per_sqft"], avgpps, derived["annual_hdd"])
+    if (derived["triple_windows"] is None): 
+        derived["triple_windows"] = infer_triple_pane_windows(metadata["year_built"], metadata["price_per_sqft"], avgpps, derived["annual_hdd"])
+    
+    derived["grid_intensity"] = get_grid_intensity(metadata["zip_code"])
+    derived["solar_yield_per_kw"] = get_solar_potential(metadata["latitude"], metadata["longitude"])
+    derived["transit_multiplier"] = get_transit_score(metadata["latitude"], metadata["longitude"])
     #output = {"metadata": metadata, "climate": climate, "derived": derived}
     #logger.info("Workflow completed for %s", address)
     #print("Workflow completed for %s" % address)
-    print("DERIVED")
-    print(derived)
-    score = estimate_carbon_footprint(metadata, climate)
+    
+    score = estimate_carbon_footprint(metadata, climate, derived)
     return score
 
 
@@ -56,6 +84,7 @@ if __name__ == "__main__":
         sys.exit(1)
     '''
     #address = sys.argv[1]
+    #address = "102 White Jasmine, Irvine CA 92618"
     address = "21040 Cory Ct, Cupertino CA 95014"  # for testing without needing to pass an argument every time
     try:
         result = run_workflow(address)

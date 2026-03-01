@@ -3,10 +3,10 @@
 The goal is to produce a small dictionary of predictable inputs for
 downstream climate/estimation code.
 """
+import numpy as np
+import re
+from homeharvest_client import scrape_address
 from typing import Any, Dict, Optional
-#import logging
-
-#logger = logging.getLogger(__name__)
 
 
 def _safe_get(obj: Any, *attrs, default=None):
@@ -58,9 +58,11 @@ def extract_basic_metadata(prop: Any) -> Dict[str, Optional[object]]:
     # coordinates
     lat = _safe_get(prop, "latitude", default=None)
     lon = _safe_get(prop, "longitude", default=None)
+    state = _safe_get(prop, "address", "state", default=None)
 
     # size and age
     sqft = _safe_get(desc, "sqft", default=None)
+    price_per_sqft = _safe_get(prop, "price_per_sqft", default=None)
     year_built = _safe_get(desc, "year_built", default=None)
     age = None
     if year_built:
@@ -76,11 +78,14 @@ def extract_basic_metadata(prop: Any) -> Dict[str, Optional[object]]:
         except Exception:
             stories = None
     
-    tax = None
-    tax_history = _safe_get(prop, "tax_history", default=None)
-    if tax_history and len(tax_history) > 0:
-        tax = _safe_get(tax_history[0], "tax_value", default=None)
-
+    zip_code = _safe_get(prop, "address", "zip_code", default=None)
+    
+    if zip_code is None:
+        formatted = _safe_get(prop, "address", "formatted_address", default="")
+        match = re.search(r'(\d{5})(?:-\d{4})?$', str(formatted))
+        if match:
+            zip_code = match.group(1)
+    
     # Infer primary construction material from the description text using
     # simple keyword heuristics. This is best-effort and should be
     # treated as a hint rather than authoritative data.
@@ -105,14 +110,16 @@ def extract_basic_metadata(prop: Any) -> Dict[str, Optional[object]]:
         "address": _safe_get(prop, "address", "formatted_address", default=None) or _safe_get(prop, "address", default=None),
         "latitude": lat,
         "longitude": lon,
+        "state": state,
         "size_sqft": sqft,
+        "price_per_sqft": price_per_sqft,
         "year_built": year_built,
         "age_years": age,
         "stories": stories,
         "inferred_fuel": fuel,
         "has_pool": "pool" in raw_text,
         "has_solar": "solar" in raw_text,
-        "tax_assessment": tax,
+        "zip_code": zip_code,
         "description_text": raw_text,
         "primary_material": primary_material,
     }
@@ -121,17 +128,14 @@ def extract_basic_metadata(prop: Any) -> Dict[str, Optional[object]]:
     print(f"Extracted metadata: {metadata}")
     return metadata
 
-# Ask for:
-# - average monthly electric/gas bill
-# - Type of heating fuel
-# - What temperature do you keep the house during the winter/summer
-# - Have you added attic insulation in the last 10 years
-# - Have you added triple-pane windows in the last 10 years
 def get_user_input():
-    kWh = None
     fuel = None
     insul = None
     trip_windows = None
+    print("Number of stories: ")
+    stories = input()
+    if (stories == ""): stories = None
+    else: stories = int(stories)
     print("Average monthly electricity usage from eletricity bill (kWh): ")
     kWh = input()
     if (kWh == ""):
@@ -147,6 +151,7 @@ def get_user_input():
         if (trip_windows == ""): trip_windows = None
     else: kWh = int(kWh)
     return {
+        "stories": stories,
         "electricity": kWh,
         "inferred_fuel": fuel,
         "insulation": insul,
