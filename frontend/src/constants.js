@@ -56,6 +56,7 @@ export const BG_URL = "/bg1.png";
 export const BG_URL2 = "/bg2.png";
 export const BG_URL3 = "/bg3.png";
 export const BG_URL4 = "/bg4.png";
+export const BG_URL5 = "/bg5.png";
 
 export const inputStyle = {
   padding: "8px 10px",
