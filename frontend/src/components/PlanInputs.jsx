@@ -79,11 +79,15 @@ export default function PlanInputs({ budget, years, priority, errors, onBudgetCh
         <button
           onClick={onGenerate}
           disabled={loading}
+          onMouseEnter={e => { if (!loading) e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.22)"; }}
+          onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; }}
           style={{
             ...generateBtnStyle,
             background: loading ? "rgba(89,58,42,0.6)" : ACCENT_COLOR,
             cursor: loading ? "default" : "pointer",
             display: "flex", alignItems: "center", gap: 10,
+            transition: "background 0.2s, box-shadow 0.2s",
+            boxShadow: "none",
           }}
         >
           {loading && (

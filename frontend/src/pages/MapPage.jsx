@@ -90,6 +90,7 @@ function YearCard({ block, checked, onToggle }) {
 export default function MapPage({ planData, onBack, onGraph }) {
   const [checked, setChecked] = useState(new Set());
   const [backHover, setBackHover] = useState(false);
+  const [graphHover, setGraphHover] = useState(false);
 
   const toggle = (id) => {
     setChecked(prev => {
@@ -211,13 +212,17 @@ export default function MapPage({ planData, onBack, onGraph }) {
         {/* View graphs button */}
         <button
           onClick={onGraph}
+          onMouseEnter={() => setGraphHover(true)}
+          onMouseLeave={() => setGraphHover(false)}
           style={{
             padding: "13px 36px", paddingLeft: 32,
             background: ACCENT_COLOR, color: "#fff",
             border: "none", borderRadius: 28,
             fontWeight: 600, fontSize: 16, cursor: "pointer",
             fontFamily: "var(--font-ui)",
-            transition: "background 0.2s", whiteSpace: "nowrap",
+            transition: "background 0.2s, box-shadow 0.2s",
+            whiteSpace: "nowrap",
+            boxShadow: graphHover ? "0 6px 20px rgba(0,0,0,0.22)" : "none",
           }}
         >
           View Graphs

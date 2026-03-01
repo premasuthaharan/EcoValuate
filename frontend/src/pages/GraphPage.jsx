@@ -160,7 +160,6 @@ export default function GraphPage({ onBack, loadData }) {
   const baseScore = loadData?.data?.past?.eco_score;
   const future = loadData?.data?.future;
   const [backHover, setBackHover] = useState(false);
-  const [houseHover, setHouseHover] = useState(false);
 
   // Popup data
   const updatedScore = future?.carbon_score_update?.updated_eco_score;
@@ -187,7 +186,7 @@ export default function GraphPage({ onBack, loadData }) {
           backgroundSize: "cover", backgroundPosition: "center 80%",
           overflow: "hidden",
           fontFamily: "var(--font-ui)",
-          display: "flex", alignItems: "center", justifyContent: "flex-end",
+          display: "flex", alignItems: "center", justifyContent: "center",
         }}>
           <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.15)" }} />
           <div style={{
@@ -215,7 +214,7 @@ export default function GraphPage({ onBack, loadData }) {
       >← Back</button>
 
       {/* Row: graph left, house+trees right */}
-      <div style={{ position: "relative", display: "flex", flexDirection: "row", alignItems: "center", gap: 60, paddingRight: 80 }}>
+      <div style={{ position: "relative", display: "flex", flexDirection: "row", alignItems: "center", gap: 48 }}>
 
       {/* Column: tabs + content box */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
@@ -319,9 +318,10 @@ export default function GraphPage({ onBack, loadData }) {
 
         {/* Right: house */}
         <div
-          style={{ position: "relative", display: "inline-flex", flexDirection: "column", alignItems: "center", cursor: "pointer" }}
-          onMouseEnter={() => setHouseHover(true)}
-          onMouseLeave={() => setHouseHover(false)}
+          style={{
+            display: "flex", flexDirection: "column", alignItems: "center",
+            cursor: "pointer",
+          }}
           onClick={() => setShowPopup(true)}
         >
           <style>{`
@@ -335,13 +335,11 @@ export default function GraphPage({ onBack, loadData }) {
             alt="house"
             style={{
               width: 320, objectFit: "contain", userSelect: "none",
-              animation: houseHover ? "houseBounce 0.6s ease-in-out infinite" : "none",
+              animation: "houseBounce 1.8s ease-in-out infinite",
             }}
           />
           <div style={{
             marginTop: 8,
-            opacity: houseHover ? 1 : 0,
-            transition: "opacity 0.2s",
             background: "rgba(255,255,255,0.85)",
             backdropFilter: "blur(4px)",
             borderRadius: 99,
