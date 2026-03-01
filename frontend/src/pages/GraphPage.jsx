@@ -1,7 +1,8 @@
 import { useState } from "react";
 
-export default function LandingPage() {
+export default function GraphPage({ onBack }) {
   const [activeTab, setActiveTab] = useState("footprint");
+  const [backHover, setBackHover] = useState(false);
 
   const tabs = [
     { id: "footprint", label: "Expected Footprint" },
@@ -17,6 +18,21 @@ export default function LandingPage() {
       alignItems: "center", justifyContent: "center",
     }}>
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.25)" }} />
+
+      {/* Back button */}
+      <button
+        onClick={onBack}
+        onMouseEnter={() => setBackHover(true)}
+        onMouseLeave={() => setBackHover(false)}
+        style={{
+          position: "absolute", top: 15, left: 15, zIndex: 10,
+          background: "none", border: "none",
+          color: backHover ? "#2d5a27" : "#4a7c59",
+          fontWeight: 900, fontSize: 20, cursor: "pointer",
+          fontFamily: "var(--font-ui)",
+          transition: "color 0.15s",
+        }}
+      >← Back</button>
 
       {/* Row: panel + house */}
       <div style={{ position: "relative", display: "flex", flexDirection: "row", alignItems: "center", gap: 60 }}>

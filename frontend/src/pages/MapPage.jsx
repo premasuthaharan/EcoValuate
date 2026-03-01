@@ -46,7 +46,7 @@ function StepBubble({ step, checked, onToggle }) {
   );
 }
 
-export default function TimelinePage({ onBack }) {
+export default function TimelinePage({ onBack, onGraph }) {
   const [checked, setChecked] = useState(new Set());
   const [backHover, setBackHover] = useState(false);
 
@@ -137,7 +137,7 @@ export default function TimelinePage({ onBack }) {
 
         {/* View graphs button */}
         <button
-          onClick={() => alert("Graphs coming soon!")}
+          onClick={onGraph}
           style={{
             padding: "13px 36px", paddingLeft: 32,
             background: ACCENT_COLOR, color: "#fff",
