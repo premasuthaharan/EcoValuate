@@ -1,4 +1,4 @@
-import { inputStyle } from "../constants";
+import { inputStyle, ACCENT_COLOR } from "../constants";
 
 export default function PlanInputs({ budget, years, priority, errors, onBudgetChange, onYearsChange, onPriorityChange, onGenerate }) {
   return (
@@ -103,7 +103,7 @@ const errorStyle = {
 };
 
 const generateBtnStyle = {
-  padding: "13px 36px", background: "#71432A", color: "#fff",
+  padding: "13px 36px", paddingLeft: 32, background: ACCENT_COLOR, color: "#fff",
   border: "none", borderRadius: 28, fontWeight: 600, fontSize: 16,
   cursor: "pointer", display: "flex", alignItems: "center", gap: 10,
   transition: "background 0.2s", whiteSpace: "nowrap",

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MOCK_SUGGESTIONS, inputStyle } from "../constants";
+import { MOCK_SUGGESTIONS, inputStyle, ACCENT_COLOR } from "../constants";
 
 export default function AddressSearch({ onGo }) {
   const [query, setQuery] = useState("");
@@ -68,7 +68,7 @@ export default function AddressSearch({ onGo }) {
         <button
           onClick={() => query.trim() && onGo(query)}
           style={{
-            padding: "8px 16px", background: "#222", color: "#fff",
+            padding: "8px 16px", background: ACCENT_COLOR, color: "#fff",
             border: "none", borderRadius: 6, cursor: "pointer",
             fontWeight: 600, fontSize: 13,
           }}

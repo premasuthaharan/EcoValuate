@@ -10,6 +10,9 @@ export const MOCK_SUGGESTIONS = [
   "222 Walnut Way, New York, NY 10001",
 ];
 
+export const ACCENT_COLOR = "#593a2a";
+export const DARK_GREEN_COLOR = "#4a7c59";
+
 export const BG_URL = "/bg1.png";
 export const BG_URL2 = "/bg2.png";
 export const BG_URL3 = "/bg3.png";
