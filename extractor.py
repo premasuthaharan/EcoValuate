@@ -51,7 +51,7 @@ def extract_basic_metadata(prop: Any) -> Dict[str, Optional[object]]:
     # infer fuel
     fuel = "unknown"
     if "gas" in raw_text:
-        fuel = "natural_gas"
+        fuel = "gas"
     if "heat pump" in raw_text or "electric" in raw_text:
         fuel = "electric"
 
@@ -128,16 +128,3 @@ def extract_basic_metadata(prop: Any) -> Dict[str, Optional[object]]:
     print(f"Extracted metadata: {metadata}")
     return metadata
 
-def get_user_input(kWh: str, fuel: str, insul: bool, trip_windows: bool, stories: int):
-    if (stories == ""): stories = None
-    if (kWh == ""): kWh = None
-    if (fuel == ""): fuel = None
-    if (insul == ""): insul = None
-    if (trip_windows == ""): trip_windows = None
-    return {
-        "stories": stories,
-        "electricity": kWh,
-        "inferred_fuel": fuel,
-        "insulation": insul,
-        "triple_windows": trip_windows,
-    }

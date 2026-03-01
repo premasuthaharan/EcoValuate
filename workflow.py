@@ -46,24 +46,18 @@ def run_workflow(address: str) -> Dict[str, Any]:
 
     derived = compute_derived_inputs(metadata, climate)
     #print(metadata)
-    #update derived with inputs
-    inputs = get_user_input()
-    temp = derived["stories"]
-    derived.update(inputs)
-    if temp is not None:
-        if derived["stories"] is None: derived["stories"] = temp
-    else:
-        if derived["stories"] is None: derived["stories"] = 1
+    
     
     #update derived with inferences
-    if (derived["inferred_fuel"] is None): 
+    if derived["inferred_fuel"] is None:
         fuel_mix = estimate_fuel_mix(metadata["year_built"], metadata["state"])
         derived["inferred_fuel"] = max(fuel_mix, key = fuel_mix.get)
+    
+    if all_data["derived"]["stories"] is None: all_data["derived"]["stories"] = 1
+
     avgpps = get_neighborhood_stats(metadata["zip_code"])
-    if (derived["insulation"] is None): 
-        derived["insulation"] = infer_attic_insulation(metadata["year_built"], metadata["price_per_sqft"], avgpps, derived["annual_hdd"])
-    if (derived["triple_windows"] is None): 
-        derived["triple_windows"] = infer_triple_pane_windows(metadata["year_built"], metadata["price_per_sqft"], avgpps, derived["annual_hdd"])
+    derived["insulation"] = infer_attic_insulation(metadata["year_built"], metadata["price_per_sqft"], avgpps, derived["annual_hdd"])
+    derived["triple_windows"] = infer_triple_pane_windows(metadata["year_built"], metadata["price_per_sqft"], avgpps, derived["annual_hdd"])
     
     derived["grid_intensity"] = get_grid_intensity(metadata["zip_code"])
     derived["solar_yield_per_kw"] = get_solar_potential(metadata["latitude"], metadata["longitude"])
@@ -71,9 +65,27 @@ def run_workflow(address: str) -> Dict[str, Any]:
     #output = {"metadata": metadata, "climate": climate, "derived": derived}
     #logger.info("Workflow completed for %s", address)
     #print("Workflow completed for %s" % address)
+    #update derived with inputs
     
+    return {"metadata": metadata, "climate": climate, "derived": derived}
+
+def get_user_input(kWh: str, fuel: str, insul: bool, trip_windows: bool, stories: int, all_data):
+    '''if (stories == ""): stories = None
+    if (kWh == ""): kWh = None
+    if (fuel == ""): fuel = None
+    if (fuel == "natural gas") fuel = "gas"
+    if (insul == ""): insul = None
+    if (trip_windows == ""): trip_windows = None
+    
+    if kWh is not None: all_data["derived"]["electricity"] = kWh
+    if fuel is not None: all_data["derived"]["inferred_fuel"] = fuel
+    if insul is not None: all_data["derived"]["insulation"] = insul
+    if trip_windows is not None: all_data["derived"]["triple_windows"] = trip_windows
+    if stories is not None: all_data["derived"]["stories"] = stories
+    '''
+
     score = estimate_carbon_footprint(metadata, climate, derived)
-    return {"metadata": metadata, "climate": climate, "derived": derived, "score": score}
+    return score
 
 '''
 if __name__ == "__main__":
