@@ -75,14 +75,14 @@ def run_workflow(address: str) -> Dict[str, Any]:
     score = estimate_carbon_footprint(metadata, climate, derived)
     return score
 
-
+'''
 if __name__ == "__main__":
     # expect the address as the first argument
-    '''
+    
     if len(sys.argv) < 2:
         print("Type: python workflow.py \"<ADDRESS>\"")
         sys.exit(1)
-    '''
+
     #address = sys.argv[1]
     #address = "102 White Jasmine, Irvine CA 92618"
     address = "21040 Cory Ct, Cupertino CA 95014"  # for testing without needing to pass an argument every time
@@ -95,3 +95,4 @@ if __name__ == "__main__":
         print("Address should be in the format: 1234 Main St, Hackville, CA 12345")
         traceback.print_exc()
         sys.exit(2)
+'''

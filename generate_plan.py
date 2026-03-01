@@ -1,11 +1,10 @@
 import dotenv
 import os
 from google import genai
-
-dotenv.load_dotenv()  # loads variables from .env into environment
-
 import json
+import math
 from typing import Dict, Any, List, Optional
+from calculator import estimate_carbon_footprint
 
 try:
     from google import genai
@@ -47,21 +46,21 @@ SUSTAINABILITY_EXTRAS = [
 # Baseline profiles (MVP defaults). Costs are approximate median USD; reductions in kgCO2e/year.
 # These are deterministic defaults used by the planner; the LLM is only used for narrative.
 ACTION_PROFILES: Dict[str, Dict[str, Any]] = {
-    "Air sealing": {"cost": 1500, "annual_co2_reduction": 200, "payback_years": 3},
-    "Solar panels": {"cost": 18000, "annual_co2_reduction": 3000, "payback_years": 8},
-    "Heat-pump water heaters": {"cost": 6000, "annual_co2_reduction": 800, "payback_years": 5},
-    "Space heating and cooling": {"cost": 12000, "annual_co2_reduction": 2500, "payback_years": 7},
-    "Electric heat-pump clothes dryer": {"cost": 1200, "annual_co2_reduction": 150, "payback_years": 4},
-    "Induction stoves": {"cost": 1200, "annual_co2_reduction": 50, "payback_years": 8},
-    "Battery storage": {"cost": 8000, "annual_co2_reduction": 200, "payback_years": 20},
-    "Upgrade to modern, high-performance insulation": {"cost": 8000, "annual_co2_reduction": 1800, "payback_years": 6},
-    "Install high-performance windows": {"cost": 10000, "annual_co2_reduction": 900, "payback_years": 10},
-    "Add sustainable flooring (eg bamboo, cork, reclaimed hardwood)": {"cost": 6000, "annual_co2_reduction": 10, "payback_years": 50},
-    "Install low-flow toilets, shower heads, and faucets": {"cost": 800, "annual_co2_reduction": 20, "payback_years": 30},
-    "Replace lightbulbs with LED lights": {"cost": 200, "annual_co2_reduction": 40, "payback_years": 1},
-    "Install an energy-efficient roof (reflective coatings, tiles, shingles)": {"cost": 12000, "annual_co2_reduction": 300, "payback_years": 25},
-    "Switch to energy-efficient appliances (especially fridge+laundry)": {"cost": 3000, "annual_co2_reduction": 400, "payback_years": 6},
-    "Smart thermostat": {"cost": 300, "annual_co2_reduction": 60, "payback_years": 2},
+    "Air sealing": {"cost": 1500, "annual_co2_reduction": 200, "payback_years": 3, "install_days": 1},
+    "Solar panels": {"cost": 18000, "annual_co2_reduction": 3000, "payback_years": 8, "install_days": 10},
+    "Heat-pump water heaters": {"cost": 6000, "annual_co2_reduction": 800, "payback_years": 5, "install_days": 2},
+    "Space heating and cooling": {"cost": 12000, "annual_co2_reduction": 2500, "payback_years": 7, "install_days": 5},
+    "Electric heat-pump clothes dryer": {"cost": 1200, "annual_co2_reduction": 150, "payback_years": 4, "install_days": 1},
+    "Induction stoves": {"cost": 1200, "annual_co2_reduction": 50, "payback_years": 8, "install_days": 1},
+    "Battery storage": {"cost": 8000, "annual_co2_reduction": 200, "payback_years": 20, "install_days": 2},
+    "Upgrade to modern, high-performance insulation": {"cost": 8000, "annual_co2_reduction": 1800, "payback_years": 6, "install_days": 4},
+    "Install high-performance windows": {"cost": 10000, "annual_co2_reduction": 900, "payback_years": 10, "install_days": 5},
+    "Add sustainable flooring (eg bamboo, cork, reclaimed hardwood)": {"cost": 6000, "annual_co2_reduction": 10, "payback_years": 50, "install_days": 7},
+    "Install low-flow toilets, shower heads, and faucets": {"cost": 800, "annual_co2_reduction": 20, "payback_years": 30, "install_days": 1},
+    "Replace lightbulbs with LED lights": {"cost": 200, "annual_co2_reduction": 40, "payback_years": 1, "install_days": 1},
+    "Install an energy-efficient roof (reflective coatings, tiles, shingles)": {"cost": 12000, "annual_co2_reduction": 300, "payback_years": 25, "install_days": 7},
+    "Switch to energy-efficient appliances (especially fridge+laundry)": {"cost": 3000, "annual_co2_reduction": 400, "payback_years": 6, "install_days": 1},
+    "Smart thermostat": {"cost": 300, "annual_co2_reduction": 60, "payback_years": 2, "install_days": 1},
 }
 
 
@@ -93,7 +92,28 @@ def _estimate_for_action(action: str, size_sqft: Optional[float]) -> Dict[str, A
         cost = int(base_cost)
         annual_co2 = int(base_co2)
 
-    return {"action": action, "estimated_cost": cost, "annual_co2_reduction": annual_co2, "payback_years": payback}
+    # Estimate install duration (days). Some actions scale with house size.
+    base_install_days = float(profile.get("install_days", 0.0))
+    if size_sqft and action in {
+        "Upgrade to modern, high-performance insulation",
+        "Install high-performance windows",
+        "Solar panels",
+        "Install an energy-efficient roof (reflective coatings, tiles, shingles)",
+    }:
+        est_days = base_install_days * factor
+    else:
+        est_days = base_install_days
+
+    # Ensure integer days, minimum 1 day
+    estimated_install_days = int(max(1, math.ceil(est_days)))
+
+    return {
+        "action": action,
+        "estimated_cost": cost,
+        "annual_co2_reduction": annual_co2,
+        "payback_years": payback,
+        "estimated_install_days": estimated_install_days,
+    }
 
 
 def _score_action_for_plan(action_est: Dict[str, Any], plan_type: str) -> float:
@@ -171,6 +191,9 @@ def generate_renovation_plan(
     size_sqft: Optional[float] = None,
     carbon_score_type: str = "kg",
     baseline_annual_co2: Optional[float] = None,
+    metadata: Optional[Dict[str, Any]] = None,
+    climate: Optional[Dict[str, Any]] = None,
+    derived: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Generate a renovation plan (JSON) constrained to the allowed actions.
 
@@ -208,11 +231,14 @@ def generate_renovation_plan(
                 "annual_co2_reduction": c["annual_co2_reduction"],
                 "payback_years": c["payback_years"],
                 "cost_effectiveness": c["cost_effectiveness"],
+                "estimated_install_days": c.get("estimated_install_days", 0.0),
+                "install_days": c.get("install_days", 0.0)
             })
             remaining_budget -= c["estimated_cost"]
 
     total_cost = sum(x["estimated_cost"] for x in selected)
     total_annual_co2 = sum(x["annual_co2_reduction"] for x in selected)
+    total_install_days = int(sum(x.get("estimated_install_days", 0) for x in selected))
     # Compute cumulative CO2 mitigation over the user's time horizon and a trees planted equivalent.
     TREE_SEQUESTRATION_KG_PER_YEAR = 22.0
     cumulative_co2 = total_annual_co2 * float(time_horizon_years)
@@ -228,19 +254,53 @@ def generate_renovation_plan(
         "selected_actions": selected,
         "total_estimated_cost": total_cost,
         "total_estimated_annual_co2_reduction": total_annual_co2,
+        "total_estimated_install_days": total_install_days,
         "cumulative_estimated_co2_reduction": cumulative_co2,
         "equivalent_trees": equivalent_trees,
         "tree_sequestration_kg_per_year": TREE_SEQUESTRATION_KG_PER_YEAR,
         "remaining_budget": remaining_budget,
     }
-    '''
-    # Update carbon score according to supplied type
+    # Update carbon score according to supplied type or using estimate_carbon_footprint
     try:
-        score_update = update_carbon_score(carbon_score, total_annual_co2, score_type=carbon_score_type, baseline_annual_co2=baseline_annual_co2)
-        plan["carbon_score_update"] = score_update
+        if metadata is not None and climate is not None and derived is not None:
+            # Use calculator.estimate_carbon_footprint to compute baseline and then
+            # reduce the baseline by the deterministic annual CO2 reductions.
+            baseline_fp = estimate_carbon_footprint(metadata, climate, derived)
+            baseline_annual_tons = float(baseline_fp.get("estimated_annual_tons", 0.0))
+            baseline_total_kg = baseline_annual_tons * 1000.0
+
+            new_total_kg = max(0.0, baseline_total_kg - float(total_annual_co2))
+            new_annual_tons = new_total_kg / 1000.0
+
+            # Scale intensity proportionally to total emissions (simple but consistent)
+            baseline_intensity = float(baseline_fp.get("carbon_intensity", 0.0))
+            new_intensity = baseline_intensity
+            if baseline_total_kg > 0:
+                new_intensity = baseline_intensity * (new_total_kg / baseline_total_kg)
+
+            # Same scoring formula as calculator.estimate_carbon_footprint
+            score = 100 * (15.0 - new_intensity) / (15.0 - 1.5)
+            new_score = max(0, min(100, round(score)))
+
+            plan["carbon_score_update"] = {
+                "baseline_estimated_annual_tons": round(baseline_annual_tons, 3),
+                "baseline_eco_score": baseline_fp.get("eco_score"),
+                "updated_estimated_annual_tons": round(new_annual_tons, 3),
+                "updated_eco_score": new_score,
+                "total_annual_co2_reduction": total_annual_co2,
+                "percent_reduction": round(((baseline_total_kg - new_total_kg) / baseline_total_kg * 100.0), 2) if baseline_total_kg > 0 else None,
+            }
+        else:
+            # Fallback: use the simpler update_carbon_score arithmetic
+            score_update = update_carbon_score(
+                carbon_score,
+                total_annual_co2,
+                score_type=carbon_score_type,
+                baseline_annual_co2=baseline_annual_co2,
+            )
+            plan["carbon_score_update"] = score_update
     except Exception as e:
         plan["carbon_score_update_error"] = str(e)
-    '''
 
     # Call the LLM to produce a short rationale, but DO NOT let it
     # invent new renovation actions or numbers. We provide the selected actions
@@ -249,11 +309,14 @@ def generate_renovation_plan(
     if client is not None:
         try:
             prompt = (
-                "You are given a pre-computed renovation plan (JSON). "
+                "You are given a renovation plan (JSON). "
                 "Do NOT add or invent renovation options; only use the provided list. "
+                "Turn the list into into a plan across the time horizon that the user inputted, and organize the renovations in a logical order (eg cheaper/quick ones first, but use your judgement). "
+                "Estimate the plan based on the number of days each action takes to install, which is already provided. Space out the renovations so that they are not back to back."
                 "Produce a short friendly rationale (2-4 sentences) explaining why these actions were selected for the user, and a bullet of suggested next steps. "
                 "Include one action from the 'Sustainability Extras' list that would complement the selected renovations and further enhance the home's sustainability, even if it doesn't directly reduce CO2."
-                "Also provide the CO2 reduced over the user's time horizon, as well as an equivalent number of trees planted and growing over that time (use the already calculated values)."
+                "Can you format the plan into 3 sections: Plan Summary, Next Steps, and Sustainability Extra? You don't need a separate rationale section. "
+                "Also provide the CO2 reduced over the user's time horizon, as well as an equivalent number of trees planted and growing over that time (use the already calculated values). Do this in the plan summary section."
                 "Input JSON:\n" + json.dumps(plan, indent=2)
             )
             resp = client.models.generate_content(model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"), contents=prompt)
@@ -265,7 +328,7 @@ def generate_renovation_plan(
 
     return plan
 
-
+'''
 if __name__ == "__main__":
     # Simple demo
     demo = generate_renovation_plan(
@@ -276,3 +339,4 @@ if __name__ == "__main__":
         size_sqft=2000,
     )
     print(json.dumps(demo, indent=2))
+'''
