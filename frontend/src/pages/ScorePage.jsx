@@ -18,6 +18,7 @@ export default function ScorePage({ loadData, onPlanGenerate, onBack }) {
   const [priority, setPriority] = useState("");
   const [animatedScore, setAnimatedScore] = useState(0);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
   const [backHover, setBackHover] = useState(false);
 
   useEffect(() => {
@@ -48,6 +49,7 @@ export default function ScorePage({ loadData, onPlanGenerate, onBack }) {
       errs.priority = "Select a priority";
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setErrors({});
+    setLoading(true);
 
     const planJson = await fetch("http://127.0.0.1:2000/api/plan", {
       method: "POST",
@@ -60,6 +62,7 @@ export default function ScorePage({ loadData, onPlanGenerate, onBack }) {
       }),
     }).then(res => res.json());
 
+    setLoading(false);
     if (onPlanGenerate) onPlanGenerate(planJson.plan);
   };
 
@@ -135,6 +138,7 @@ export default function ScorePage({ loadData, onPlanGenerate, onBack }) {
           onYearsChange={(v) => { setYears(v); setErrors(p => ({ ...p, years: undefined })); }}
           onPriorityChange={(v) => { setPriority(v); setErrors(p => ({ ...p, priority: undefined })); }}
           onGenerate={handleGenerate}
+          loading={loading}
         />
       </div>
     </div>

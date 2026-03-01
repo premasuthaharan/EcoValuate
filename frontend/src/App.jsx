@@ -11,19 +11,22 @@ export default function App() {
   const [loadData, setLoadData] = useState(null);
   const [formData, setFormData] = useState(null);
   const [planData, setPlanData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   async function handleGo(a) {
     setAddress(a);
+    setLoading(true);
     const json = await fetch("http://127.0.0.1:2000/api/load", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ address: a }),
     }).then(res => res.json());
     setLoadData(json);
+    setLoading(false);
     setPage("info");
   }
 
-  if (page === "start") return <StartPage onGo={handleGo} />;
+  if (page === "start") return <StartPage onGo={handleGo} loading={loading} />;
   if (page === "info") return <InfoPage address={address} loadData={loadData} onSubmit={(d, past, updatedHomeData) => { setFormData(d); setLoadData(prev => ({ ...prev, data: { ...updatedHomeData, past } })); setPage("score"); }} onBack={() => setPage("start")} />;
   if (page === "score") return <ScorePage formData={formData} loadData={loadData} onPlanGenerate={future => { const next = { ...loadData, data: { ...loadData.data, future } }; setPlanData(future); setLoadData(next); setPage("map"); }} onBack={() => setPage("info")} />;
   if (page === "map") return <MapPage planData={planData} onBack={() => setPage("score")} onGraph={() => setPage("graph")} />;

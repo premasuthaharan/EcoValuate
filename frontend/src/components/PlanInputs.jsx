@@ -1,6 +1,6 @@
 import { inputStyle, ACCENT_COLOR } from "../constants";
 
-export default function PlanInputs({ budget, years, priority, errors, onBudgetChange, onYearsChange, onPriorityChange, onGenerate }) {
+export default function PlanInputs({ budget, years, priority, errors, onBudgetChange, onYearsChange, onPriorityChange, onGenerate, loading }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 36 }}>
       {/* Input row */}
@@ -76,9 +76,28 @@ export default function PlanInputs({ budget, years, priority, errors, onBudgetCh
 
       {/* Centered button */}
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <button style={generateBtnStyle} onClick={onGenerate}>
-          Generate Plan
+        <button
+          onClick={onGenerate}
+          disabled={loading}
+          style={{
+            ...generateBtnStyle,
+            background: loading ? "rgba(89,58,42,0.6)" : ACCENT_COLOR,
+            cursor: loading ? "default" : "pointer",
+            display: "flex", alignItems: "center", gap: 10,
+          }}
+        >
+          {loading && (
+            <span style={{
+              width: 16, height: 16, borderRadius: "50%",
+              border: "2px solid rgba(255,255,255,0.35)",
+              borderTopColor: "#fff",
+              display: "inline-block",
+              animation: "spin 0.7s linear infinite",
+            }} />
+          )}
+          {loading ? "Generating..." : "Generate Plan"}
         </button>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     </div>
   );

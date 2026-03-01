@@ -8,7 +8,7 @@ const clouds = [
   { top: "12vh", left: "82vw", width: "20vw", opacity: 0.80 },
 ];
 
-export default function StartPage({ onGo }) {
+export default function StartPage({ onGo, loading }) {
   const [query, setQuery] = useState("");
   const [goHover, setGoHover] = useState(false);
 
@@ -86,19 +86,33 @@ export default function StartPage({ onGo }) {
 
         {/* Go button */}
         <button
-          onClick={() => query.trim() && onGo(query)}
+          onClick={() => !loading && query.trim() && onGo(query)}
           onMouseEnter={() => setGoHover(true)}
           onMouseLeave={() => setGoHover(false)}
+          disabled={loading}
           style={{
-            padding: "13px 36px", paddingLeft: 32,
-            background: ACCENT_COLOR, color: "#fff",
-            border: "none", borderRadius: 28, cursor: "pointer",
+            padding: "13px 36px",
+            background: loading ? "rgba(89,58,42,0.6)" : ACCENT_COLOR, color: "#fff",
+            border: "none", borderRadius: 28, cursor: loading ? "default" : "pointer",
             fontWeight: 600, fontSize: 16,
             transition: "background 0.2s, box-shadow 0.2s", whiteSpace: "nowrap",
             fontFamily: "var(--font-ui)",
-            boxShadow: goHover ? "0 6px 18px rgba(0,0,0,0.22)" : "none",
+            boxShadow: goHover && !loading ? "0 6px 18px rgba(0,0,0,0.22)" : "none",
+            display: "flex", alignItems: "center", gap: 10,
           }}
-        >Go</button>
+        >
+          {loading && (
+            <span style={{
+              width: 16, height: 16, borderRadius: "50%",
+              border: "2px solid rgba(255,255,255,0.35)",
+              borderTopColor: "#fff",
+              display: "inline-block",
+              animation: "spin 0.7s linear infinite",
+            }} />
+          )}
+          {loading ? "Loading..." : "Go"}
+        </button>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     </div>
   );
