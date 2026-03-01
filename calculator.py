@@ -8,6 +8,9 @@ simple flags used in many residential energy/carbon models.
 import requests
 import pandas as pd
 import os
+import dotenv
+
+dotenv.load_dotenv()
 
 from typing import Dict, Any
 from homeharvest_client import scrape_property
@@ -147,7 +150,7 @@ def get_solar_potential(lat: float, lon: float) -> float:
     Queries NREL PVWatts V8 to get annual kWh per kW installed.
     """
     
-    api_key = "gODUxpC1JN1V6IFOJgTphT3Z84GKfa7lcpEaK05G" 
+    api_key = os.getenv("NREL_API_KEY")
     url = f"https://developer.nrel.gov/api/pvwatts/v8.json?api_key={api_key}&lat={lat}&lon={lon}&system_capacity=1&azimuth=180&tilt=20&array_type=1&module_type=0&losses=14"
     
     try:
