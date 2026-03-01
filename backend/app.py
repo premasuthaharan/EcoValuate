@@ -3,7 +3,7 @@ from workflow import run_workflow
 import traceback
 from flask_cors import CORS
 from generate_plan import generate_renovation_plan
-from climate import estimate_carbon_footprint
+from calculator import estimate_carbon_footprint
 
 app = Flask(__name__)
 CORS(app)
@@ -40,6 +40,7 @@ def get_footprint():
     }
     """
     data = request.get_json()
+    # print(data.keys())
     meta = data['home_data']['metadata']
     climate = data['home_data']['climate']
     derived = data['home_data']['derived']

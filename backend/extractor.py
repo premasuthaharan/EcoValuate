@@ -128,32 +128,32 @@ def extract_basic_metadata(prop: Any) -> Dict[str, Optional[object]]:
     print(f"Extracted metadata: {metadata}")
     return metadata
 
-def get_user_input():
-    fuel = None
-    insul = None
-    trip_windows = None
-    print("Number of stories: ")
-    stories = input()
-    if (stories == ""): stories = None
-    else: stories = int(stories)
-    print("Average monthly electricity usage from eletricity bill (kWh): ")
-    kWh = input()
-    if (kWh == ""):
-        kWh = None
-        print("Type of heating fuel: ")
-        fuel = input()
-        if (fuel == ""): fuel = None
-        print("Attic insulation within past 10 years: ")
-        insul = input()
-        if (insul == ""): insul = None
-        print("Triple-pane windows within past 10 years: ")
-        trip_windows = input()
-        if (trip_windows == ""): trip_windows = None
-    else: kWh = int(kWh)
-    return {
-        "stories": stories,
-        "electricity": kWh,
-        "inferred_fuel": fuel,
-        "insulation": insul,
-        "triple_windows": trip_windows,
-    }
+# def get_user_input():
+#     fuel = None
+#     insul = None
+#     trip_windows = None
+#     print("Number of stories: ")
+#     stories = input()
+#     if (stories == ""): stories = None
+#     else: stories = int(stories)
+#     print("Average monthly electricity usage from eletricity bill (kWh): ")
+#     kWh = input()
+#     if (kWh == ""):
+#         kWh = None
+#         print("Type of heating fuel: ")
+#         fuel = input()
+#         if (fuel == ""): fuel = None
+#         print("Attic insulation within past 10 years: ")
+#         insul = input()
+#         if (insul == ""): insul = None
+#         print("Triple-pane windows within past 10 years: ")
+#         trip_windows = input()
+#         if (trip_windows == ""): trip_windows = None
+#     else: kWh = int(kWh)
+#     return {
+#         "stories": stories,
+#         "electricity": kWh,
+#         "inferred_fuel": fuel,
+#         "insulation": insul,
+#         "triple_windows": trip_windows,
+#     }
