@@ -1,14 +1,10 @@
 export const MOCK_SUGGESTIONS = [
-  "123 Main St, San Francisco, CA 94105",
-  "67 Sixty-Seventh Ave, New York, NY 6767",
-  "456 Oak Ave, Los Angeles, CA 90001",
-  "789 Pine Rd, Seattle, WA 98101",
-  "321 Elm St, Austin, TX 73301",
-  "654 Maple Dr, Denver, CO 80201",
-  "987 Cedar Ln, Portland, OR 97201",
-  "111 Birch Blvd, Chicago, IL 60601",
-  "222 Walnut Way, New York, NY 10001",
-  "22 Modesto, Irvine, CA 92602",
+  "14 Cumberland Dr, Brick, NJ",
+  "456 Oak Ave, Malaga, NJ",
+  "30 Mageira St, South River, NJ",
+  "103 Villa Rdg, Irvine, CA",
+  "644 Leon Dr, Endicott, NY",
+  "22 Modesto, Irvine, CA",
 ];
 
 export const TIMELINE = [
