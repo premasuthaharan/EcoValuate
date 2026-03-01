@@ -63,56 +63,6 @@ def compute_derived_inputs(metadata: Dict[str, Any], climate: Dict[str, Any]) ->
 
     return derived
 
-def estimate_carbon_footprint(metadata, climate):
-    """
-    metadata: dict from extract_carbon_metadata (sqft, stories, age, etc.)
-    climate: dict from get_climate_metrics (annual_hdd, annual_cdd)
-    """
-    # 1. Base Energy Intensity (BTU per sqft per Degree Day)
-    # Older homes (pre-1980) have higher intensity due to poor insulation
-    age_multiplier = 1.3 if (metadata['age_years'] and metadata['age_years'] > 45) else 1.0
-    
-    # Surface-to-Volume Adjustment (Stories)
-    # More stories = more efficient 'cube' shape
-    story_multiplier = 1.0
-    if metadata['stories']:
-        if metadata['stories'] == 1: story_multiplier = 1.15 # Less efficient
-        if metadata['stories'] >= 2: story_multiplier = 0.90 # More efficient
-    
-    # 2. Estimate Energy Consumption
-    # Heating Load (Approx 15-20 BTU per sqft per HDD)
-    heat_btu = metadata['size_sqft'] * climate['annual_hdd'] * 18 * age_multiplier * story_multiplier
-    
-    # Cooling Load (Approx 10-15 BTU per sqft per CDD)
-    cool_btu = metadata['size_sqft'] * climate['annual_cdd'] * 12 * age_multiplier * story_multiplier
-    
-    # 3. Convert to Carbon (Metric Tons CO2e)
-    # EPA Factors: 
-    # Natural Gas: 0.053 kg CO2 per cubic foot (approx 1000 BTU)
-    # Electricity: ~0.4 kg CO2 per kWh (US Average)
-    
-    total_tons = 0
-    
-    if metadata['inferred_fuel'] == "natural_gas":
-        # Heating via Gas
-        total_tons += (heat_btu / 1000) * 0.000053 
-        # Cooling via Electricity (Convert BTU to kWh: 3412 BTU = 1 kWh)
-        total_tons += (cool_btu / 3412) * 0.0004
-    else:
-        # Assume All-Electric (Heat Pump)
-        # Heat pumps are ~300% efficient, so we divide thermal load by 3
-        total_tons += ((heat_btu + cool_btu) / (3412 * 3)) * 0.0004
-        
-    # 4. Add Baseload (Appliances/Lighting/Water)
-    # Average US home baseload is ~4-6 tons CO2/year
-    total_tons += 5.0 
-    
-    return {
-        "estimated_annual_tons": round(total_tons, 2),
-        "confidence_score": "Medium (Inferred Fuel)" if metadata['inferred_fuel'] == "unknown" else "High",
-        "primary_driver": "Heating" if climate['annual_hdd'] > climate['annual_cdd'] else "Cooling"
-    }
-
 # Usage:
 # footprint = estimate_carbon_footprint(carbon_data, climate)
 # print(f"This house emits approximately {footprint['estimated_annual_tons']} metric tons of CO2 per year.")
@@ -257,13 +207,31 @@ def estimate_carbon_footprint(metadata: Dict[str, Any], climate: Dict[str, Any],
     # Use the local grid intensity fetched earlier (kg CO2 / kWh)
     grid_factor = derived.get("grid_intensity", 0.371) 
     total_kg = 0
+    inferred_fuel = derived.get("inferred_fuel")
+    if inferred_fuel == "oil":
+        # Distillate Fuel Oil No. 2: ~0.073 kg CO2 per 1,000 BTU
+        # Roughly 38% higher carbon footprint than gas
+        total_kg += (heat_btu / 1000) * 0.0732
+        
+    elif inferred_fuel == "propane":
+        # Propane: ~0.063 kg CO2 per 1,000 BTU
+        total_kg += (heat_btu / 1000) * 0.0631
 
-    if derived.get("inferred_fuel") == "natural_gas":
-        total_kg += (heat_btu / 1000) * 0.053 # Gas heating
-        total_kg += (cool_btu / 3412) * grid_factor # Electric cooling
-    else:
-        # All-Electric (Assume Heat Pump COP of 3.0)
-        total_kg += ((heat_btu + cool_btu) / (3412 * 3.0)) * grid_factor
+    elif inferred_fuel == "electric":
+        # Check if it's likely a Heat Pump (modern/southern) or Resistance (old/northern)
+        # For a general model, we use a blended COP of 2.5 for heat pumps
+        # and 1.0 for resistance. 
+        cop = 2.5 
+        total_kg += (heat_btu / (3412 * cop)) * grid_factor
+        
+    else: # Fallback / Unknown
+        # Default to Natural Gas as it is the most common US heating fuel
+        total_kg += (heat_btu / 1000) * 0.0531
+
+    # 2. COOLING CALCULATION (Always Electric)
+    # Convert BTU to kWh (3412 BTU = 1 kWh)
+    # Standard AC SEER rating adjustment included (approx 3.0 COP)
+    total_kg += (cool_btu / (3412 * 3.0)) * grid_factor
 
     # 4. Lifestyle Layers (Baseload + Transport)
     # Average US household baseload (appliances/lights) ~ 3000 kg
