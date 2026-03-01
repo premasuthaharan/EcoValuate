@@ -232,7 +232,7 @@ export default function GraphPage({ onBack, loadData }) {
                   border: "none",
                   borderRadius: "8px 8px 0 0",
                   cursor: "pointer",
-                  background: activeTab === tab.id ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.55)",
+                  background: activeTab === tab.id ? "rgba(255,255,255,0.88)" : "#8B5E3C",
                   color: activeTab === tab.id ? "#111" : "#fff",
                   transition: "background 0.2s, color 0.2s",
                 }}
