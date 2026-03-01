@@ -1,3 +1,0 @@
-homeharvest
-requests
-pandas
