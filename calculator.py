@@ -134,36 +134,35 @@ def get_neighborhood_stats(zip_code):
 def get_grid_intensity(zip_code: str) -> float:
     """
     Looks up the CO2 emission factor for a given ZIP code using eGRID data.
+    Matches CSV: Subregion, FlowName, Emission_factor, Compartment, Unit, Year
     """
     csv_path = "egrid.csv"
     
-    # 1. Load the Emission Factor Data
     try:
         ef_df = pd.read_csv(csv_path)
-        # Filter for CO2 air emissions
-        co2_df = ef_df[(ef_df["FlowName"] == "CO2") & (ef_df["Context"] == "air")].copy()
         
-        # Convert Value (typically lb/MWh or g/kWh) to kg/kWh
-        # Note: Check your CSV units. If 'Value' is in lbs/MWh, divide by 2204.6
-        # If 'Value' is in g/kWh, divide by 1000.
-        co2_df["kgCO2_per_kWh"] = co2_df["Value"] / 1000 
+        # Filter logic adjusted for your column names:
+        # 1. FlowName is CO2
+        # 2. Compartment is 'air' (previously called 'Context')
+        co2_df = ef_df[(ef_df["FlowName"] == "Carbon dioxide") & 
+                       (ef_df["Compartment"].str.lower() == "air")].copy()
+        
+        co2_df["kgCO2_per_kWh"] = (co2_df["Emission_factor"] * 0.453592) / 1000
+        
     except Exception as e:
         print(f"Error loading eGRID CSV: {e}")
         return 0.371 # US Average Fallback
 
-    # 2. Get Subregion from ZIP
-    # In a full US-wide build, you'd load 'zip_to_egrid.csv' here.
-    # For now, we use a logic-based mapper for major regions.
     subregion = lookup_subregion_by_zip(zip_code)
     
     if subregion:
-        # Match against the 'Subregion' column in your eGRID CSV
+        # Match against your 'Subregion' column
         row = co2_df[co2_df["Subregion"] == subregion]
         if not row.empty:
             return float(row["kgCO2_per_kWh"].iloc[0])
             
-    # 3. Fallback to US Average (eGRID 'US' or 'ENT' total)
-    avg_row = co2_df[co2_df["Subregion"].isin(["US", "UUSA", "USA"])]
+    # Fallback to US Average if subregion not found
+    avg_row = co2_df[co2_df["Subregion"].isin(["US", "USA", "UUSA", "ENT"])]
     if not avg_row.empty:
         return float(avg_row["kgCO2_per_kWh"].iloc[0])
         
