@@ -3,6 +3,11 @@ import Field from "../components/Field";
 import Toggle from "../components/Toggle";
 import { BG_URL2, inputStyle, ACCENT_COLOR } from "../constants";
 
+const clouds = [
+  { top: "8vh", left: "8vw", width: "20vw", opacity: 0.80 },
+  { top: "-8vh", left: "44vw", width: "22vw", opacity: 0.75 },
+];
+
 export default function InfoPage({ address, loadData, onSubmit, onBack }) {
   const m = loadData?.data?.metadata ?? {};
   const d = loadData?.data?.derived ?? {};
@@ -20,6 +25,7 @@ export default function InfoPage({ address, loadData, onSubmit, onBack }) {
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
   const [backHover, setBackHover] = useState(false);
+  const [submitHover, setSubmitHover] = useState(false);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -71,6 +77,12 @@ export default function InfoPage({ address, loadData, onSubmit, onBack }) {
       alignItems: "center", justifyContent: "center",
       fontFamily: "var(--font-ui)",
     }}>
+      <style>{`
+        @keyframes cloudBounce {
+          0%, 100% { transform: translateY(0); }
+          50%       { transform: translateY(-12px); }
+        }
+      `}</style>
       <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.15)" }} />
       <div style={{
         position: "absolute", inset: 0,
@@ -80,6 +92,24 @@ export default function InfoPage({ address, loadData, onSubmit, onBack }) {
         WebkitMaskImage: "radial-gradient(ellipse 65% 55% at 50% 52%, black 20%, transparent 75%)",
         pointerEvents: "none",
       }} />
+      {clouds.map((c, i) => (
+        <img
+          key={i}
+          src="/cloud.png"
+          alt=""
+          style={{
+            position: "absolute",
+            top: c.top, left: c.left,
+            width: c.width,
+            opacity: c.opacity,
+            filter: "grayscale(1) brightness(1.15)",
+            pointerEvents: "none",
+            userSelect: "none",
+            animation: `cloudBounce ${3 + i * 0.8}s ease-in-out infinite`,
+            animationDelay: `${i * 0.5}s`,
+          }}
+        />
+      ))}
 
       {/* Back button */}
       <button
@@ -217,13 +247,16 @@ export default function InfoPage({ address, loadData, onSubmit, onBack }) {
         <div style={{ display: "flex", justifyContent: "center" }}>
           <button
             onClick={handleSubmit}
+            onMouseEnter={() => setSubmitHover(true)}
+            onMouseLeave={() => setSubmitHover(false)}
             style={{
               padding: "13px 30px", paddingLeft: 22,
               background: submitted ? "#888" : ACCENT_COLOR,
               color: "#fff", border: "none", borderRadius: 28,
               fontWeight: 600, fontSize: 16, cursor: "pointer",
               display: "flex", alignItems: "center", gap: 10,
-              transition: "background 0.2s", whiteSpace: "nowrap",
+              transition: "background 0.2s, box-shadow 0.2s", whiteSpace: "nowrap",
+              boxShadow: submitHover && !submitted ? "0 6px 18px rgba(0,0,0,0.22)" : "none",
             }}
           >
             <span>✓</span> {submitted ? "Submitted!" : "Submit"}

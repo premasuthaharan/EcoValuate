@@ -3,12 +3,14 @@ import AddressSearch from "../components/AddressSearch";
 import { BG_URL, ACCENT_COLOR } from "../constants";
 
 const clouds = [
-  { top: "-5vh", left: "35vw", width: "22vw", opacity: 0.85 },
-  { top: "14vh", left: "50vw", width: "21vw", opacity: 0.75 },
+  { top: "8vh", left: "10vw", width: "22vw", opacity: 0.85 },
+  { top: "-5vh", left: "40vw", width: "21vw", opacity: 0.75 },
+  { top: "12vh", left: "82vw", width: "20vw", opacity: 0.80 },
 ];
 
 export default function StartPage({ onGo }) {
   const [query, setQuery] = useState("");
+  const [goHover, setGoHover] = useState(false);
 
   return (
     <div style={{
@@ -54,7 +56,7 @@ export default function StartPage({ onGo }) {
       <div style={{
         position: "relative",
         display: "flex", flexDirection: "column", alignItems: "center", gap: 24,
-        marginTop: -180,
+        marginTop: -80,
         width: 500,
       }}>
         <h1 style={{
@@ -85,13 +87,16 @@ export default function StartPage({ onGo }) {
         {/* Go button */}
         <button
           onClick={() => query.trim() && onGo(query)}
+          onMouseEnter={() => setGoHover(true)}
+          onMouseLeave={() => setGoHover(false)}
           style={{
             padding: "13px 36px", paddingLeft: 32,
             background: ACCENT_COLOR, color: "#fff",
             border: "none", borderRadius: 28, cursor: "pointer",
             fontWeight: 600, fontSize: 16,
-            transition: "background 0.2s", whiteSpace: "nowrap",
+            transition: "background 0.2s, box-shadow 0.2s", whiteSpace: "nowrap",
             fontFamily: "var(--font-ui)",
+            boxShadow: goHover ? "0 6px 18px rgba(0,0,0,0.22)" : "none",
           }}
         >Go</button>
       </div>
