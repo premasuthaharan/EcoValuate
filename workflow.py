@@ -45,7 +45,7 @@ def run_workflow(address: str) -> Dict[str, Any]:
     climate = get_climate_metrics(lat, lon)
 
     derived = compute_derived_inputs(metadata, climate)
-    print(metadata)
+    #print(metadata)
     #update derived with inputs
     inputs = get_user_input()
     temp = derived["stories"]
@@ -73,22 +73,22 @@ def run_workflow(address: str) -> Dict[str, Any]:
     #print("Workflow completed for %s" % address)
     
     score = estimate_carbon_footprint(metadata, climate, derived)
-    return score
+    return {"metadata": metadata, "climate": climate, "derived": derived, "score": score}
 
 '''
 if __name__ == "__main__":
     # expect the address as the first argument
     
-    if len(sys.argv) < 2:
-        print("Type: python workflow.py \"<ADDRESS>\"")
-        sys.exit(1)
+    #if len(sys.argv) < 2:
+    #    print("Type: python workflow.py \"<ADDRESS>\"")
+    #    sys.exit(1)
 
     #address = sys.argv[1]
     #address = "102 White Jasmine, Irvine CA 92618"
     address = "21040 Cory Ct, Cupertino CA 95014"  # for testing without needing to pass an argument every time
     try:
         result = run_workflow(address)
-        print(json.dumps(result, indent=2, default=str))
+        #print(json.dumps(result, indent=2, default=str))
     except Exception as exc:
         # Print a short friendly message and the traceback for debugging.
         print(f"Error running workflow for {address}: {exc}")
