@@ -65,7 +65,7 @@ def get_plan():
         "budget": 15000,
         "horizon": 5,
         "plan_type": "balanced",
-        "home_data": {metadata: {}, climate: {}, derived: {}}  # full output from workflow
+        "home_data": {metadata: {}, climate: {}, derived: {}, past: {}, ...}  # full output from workflow
     }
     """
     data = request.get_json()
@@ -75,9 +75,10 @@ def get_plan():
         metadata = full_house_data.get('metadata')
         climate = full_house_data.get('climate')
         derived = full_house_data.get('derived')
+        past = full_house_data.get('past')
 
         plan = generate_renovation_plan(
-            carbon_score=full_house_data['eco_score'],
+            carbon_score=past['eco_score'],
             budget_usd=data.get('budget', 10000),
             time_horizon_years=data.get('horizon', 10),
             plan_type=data.get('plan_type', 'balanced'),

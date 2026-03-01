@@ -12,7 +12,7 @@ const getEmoji = (score) => {
 };
 
 export default function ScorePage({ loadData, onPlanGenerate, onBack }) {
-  const score = loadData?.data?.past?.eco_score ?? 40;
+  const score = loadData?.data?.past?.eco_score ?? 47;
   const [budget, setBudget] = useState("");
   const [years, setYears] = useState("");
   const [priority, setPriority] = useState("");
@@ -60,7 +60,6 @@ export default function ScorePage({ loadData, onPlanGenerate, onBack }) {
       }),
     }).then(res => res.json());
 
-    console.log("planJson:", planJson);
     if (onPlanGenerate) onPlanGenerate(planJson.plan);
   };
 
