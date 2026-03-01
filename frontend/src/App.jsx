@@ -9,6 +9,6 @@ export default function App() {
   const [formData, setFormData] = useState(null);
 
   if (page === "start") return <StartPage onGo={a => { setAddress(a); setPage("info"); }} />;
-  if (page === "info") return <InfoPage address={address} onSubmit={d => { setFormData(d); setPage("score"); }} />;
-  if (page === "score") return <ScorePage formData={formData} onPlanGenerate={inputs => console.log("Plan inputs:", inputs)} />;
+  if (page === "info") return <InfoPage address={address} onSubmit={d => { setFormData(d); setPage("score"); }} onBack={() => setPage("start")} />;
+  if (page === "score") return <ScorePage formData={formData} onPlanGenerate={inputs => console.log("Plan inputs:", inputs)} onBack={() => setPage("info")} />;
 }

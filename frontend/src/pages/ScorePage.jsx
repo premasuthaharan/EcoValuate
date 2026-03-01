@@ -14,13 +14,14 @@ const getEmoji = (score) => {
   return { face: "😢", label: "Critical" };
 };
 
-export default function ScorePage({ onPlanGenerate }) {
+export default function ScorePage({ onPlanGenerate, onBack }) {
   const score = PLACEHOLDER_SCORE; // swap this out for a prop or context value
   const [budget, setBudget] = useState("");
   const [years, setYears] = useState("");
   const [priority, setPriority] = useState("");
   const [animatedScore, setAnimatedScore] = useState(0);
   const [errors, setErrors] = useState({});
+  const [backHover, setBackHover] = useState(false);
 
   useEffect(() => {
     let start = 0;
@@ -74,6 +75,21 @@ export default function ScorePage({ onPlanGenerate }) {
         WebkitMaskImage: "radial-gradient(ellipse 65% 55% at 50% 52%, black 20%, transparent 75%)",
         pointerEvents: "none",
       }} />
+
+      {/* Back button */}
+      <button
+        onClick={onBack}
+        onMouseEnter={() => setBackHover(true)}
+        onMouseLeave={() => setBackHover(false)}
+        style={{
+          position: "absolute", top: 15, left: 15,
+          background: "none", border: "none",
+          color: backHover ? "#2d5a27" : "#4a7c59",
+          fontWeight: 900, fontSize: 20, cursor: "pointer",
+          fontFamily: "var(--font-ui)",
+          transition: "color 0.15s",
+        }}
+      >← Back</button>
 
       {/* Content */}
       <div style={{

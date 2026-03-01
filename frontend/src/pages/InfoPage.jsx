@@ -4,7 +4,7 @@ import Toggle from "../components/Toggle";
 import PageCard from "../components/PageCard";
 import { BG_URL2, inputStyle } from "../constants";
 
-export default function InfoPage({ address, onSubmit }) {
+export default function InfoPage({ address, onSubmit, onBack }) {
   const [form, setForm] = useState({
     address, sqft: "", yearBuilt: "", pool: false,
     lat: "", lon: "", solarPanels: false,
@@ -12,6 +12,7 @@ export default function InfoPage({ address, onSubmit }) {
   });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [backHover, setBackHover] = useState(false);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -24,6 +25,20 @@ export default function InfoPage({ address, onSubmit }) {
   };
 
   return (
+    <>
+      <button
+        onClick={onBack}
+        onMouseEnter={() => setBackHover(true)}
+        onMouseLeave={() => setBackHover(false)}
+        style={{
+          position: "fixed", top: 15, left: 15, zIndex: 10,
+          background: "none", border: "none",
+          color: backHover ? "#2d5a27" : "#4a7c59",
+          fontWeight: 900, fontSize: 20, cursor: "pointer",
+          fontFamily: "var(--font-ui)",
+          transition: "color 0.15s",
+        }}
+      >← Back</button>
     <PageCard bgUrl={BG_URL2} width={660}>
       <div style={{ padding: "42px 48px" }}>
         <h2 style={{ margin: "0 0 24px", color: "#2d5a27", fontWeight: 700, fontSize: 22 }}>
@@ -101,5 +116,7 @@ export default function InfoPage({ address, onSubmit }) {
         </div>
       </div>
     </PageCard>
+    </>
   );
 }
+

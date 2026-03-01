@@ -2,7 +2,7 @@ import { inputStyle } from "../constants";
 
 export default function PlanInputs({ budget, years, priority, errors, onBudgetChange, onYearsChange, onPriorityChange, onGenerate }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 36 }}>
       {/* Input row */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
         <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 6, flex: "1 1 180px" }}>
@@ -58,6 +58,7 @@ export default function PlanInputs({ budget, years, priority, errors, onBudgetCh
               appearance: "none",
               WebkitAppearance: "none",
               borderColor: errors.priority ? "#c0392b" : undefined,
+              color: priority ? "rgb(51,51,51)" : "rgb(118,118,118)",
             }}
           >
             <option value="" disabled>Priority</option>
@@ -102,7 +103,7 @@ const errorStyle = {
 };
 
 const generateBtnStyle = {
-  padding: "13px 36px", background: "#4a7c59", color: "#fff",
+  padding: "13px 36px", background: "#71432A", color: "#fff",
   border: "none", borderRadius: 28, fontWeight: 600, fontSize: 16,
   cursor: "pointer", display: "flex", alignItems: "center", gap: 10,
   transition: "background 0.2s", whiteSpace: "nowrap",
