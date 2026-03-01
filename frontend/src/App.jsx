@@ -8,11 +8,23 @@ import MapPage from "./pages/MapPage";
 export default function App() {
   const [page, setPage] = useState("start");
   const [address, setAddress] = useState("");
+  const [loadData, setLoadData] = useState(null);
   const [formData, setFormData] = useState(null);
   const [planData, setPlanData] = useState(null);
 
-  if (page === "start") return <StartPage onGo={a => { setAddress(a); setPage("info"); }} />;
-  if (page === "info") return <InfoPage address={address} onSubmit={d => { setFormData(d); setPage("score"); }} onBack={() => setPage("start")} />;
+  async function handleGo(a) {
+    setAddress(a);
+    const json = await fetch("http://127.0.0.1:2000/api/load", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ address: a }),
+    }).then(res => res.json());
+    setLoadData(json);
+    setPage("info");
+  }
+
+  if (page === "start") return <StartPage onGo={handleGo} />;
+  if (page === "info") return <InfoPage address={address} loadData={loadData} onSubmit={d => { setFormData(d); setPage("score"); }} onBack={() => setPage("start")} />;
   if (page === "score") return <ScorePage formData={formData} onPlanGenerate={inputs => { setPlanData(inputs); setPage("map"); }} onBack={() => setPage("info")} />;
   if (page === "map") return <MapPage planData={planData} onBack={() => setPage("score")} onGraph={() => setPage("graph")} />;
   if (page === "graph") return <GraphPage onBack={() => setPage("map")} />;

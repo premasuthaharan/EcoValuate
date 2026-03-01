@@ -8,6 +8,7 @@ export const MOCK_SUGGESTIONS = [
   "987 Cedar Ln, Portland, OR 97201",
   "111 Birch Blvd, Chicago, IL 60601",
   "222 Walnut Way, New York, NY 10001",
+  "22 Modesto, Irvine, CA 92602",
 ];
 
 export const TIMELINE = [
