@@ -39,7 +39,6 @@ export default function ScoreSlider({ animatedScore, score }) {
           left: `calc(${thumbPct}% - 10px)`,
           top: "50%",
           transform: "translateY(-50%)",
-          transition: "left 0.05s linear",
           width: 20, height: 20,
           borderRadius: "50%",
           background: trackColor,
