@@ -1,7 +1,7 @@
 import { useState } from "react";
 import StartPage from "./pages/StartPage";
 import InfoPage from "./pages/InfoPage";
-import ResultsPage from "./pages/ResultsPage";
+import ScorePage from "./pages/ScorePage";
 
 export default function App() {
   const [page, setPage] = useState("start");
@@ -9,6 +9,6 @@ export default function App() {
   const [formData, setFormData] = useState(null);
 
   if (page === "start") return <StartPage onGo={a => { setAddress(a); setPage("info"); }} />;
-  if (page === "info") return <InfoPage address={address} onSubmit={d => { setFormData(d); setPage("results"); }} />;
-  if (page === "results") return <ResultsPage data={formData} />;
+  if (page === "info") return <InfoPage address={address} onSubmit={d => { setFormData(d); setPage("score"); }} />;
+  if (page === "score") return <ScorePage formData={formData} onPlanGenerate={inputs => console.log("Plan inputs:", inputs)} />;
 }

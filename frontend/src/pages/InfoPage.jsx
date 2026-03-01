@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Field from "../components/Field";
 import Toggle from "../components/Toggle";
+import PageCard from "../components/PageCard";
 import { BG_URL2, inputStyle } from "../constants";
 
 export default function InfoPage({ address, onSubmit }) {
@@ -23,23 +24,8 @@ export default function InfoPage({ address, onSubmit }) {
   };
 
   return (
-    <div style={{
-      width: "100vw", height: "100vh", position: "relative",
-      backgroundImage: `url(${BG_URL2})`,
-      backgroundSize: "cover", backgroundPosition: "center",
-      display: "flex", alignItems: "center", justifyContent: "center",
-    }}>
-      <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.2)" }} />
-      <div style={{
-        position: "relative",
-        background: "rgba(255,255,255,0.72)",
-        backdropFilter: "blur(8px)",
-        borderRadius: 16,
-        padding: "42px 48px 42px",
-        width: 660,
-        boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
-        maxHeight: "90vh", overflowY: "auto",
-      }}>
+    <PageCard bgUrl={BG_URL2} width={660}>
+      <div style={{ padding: "42px 48px" }}>
         <h2 style={{ margin: "0 0 24px", color: "#2d5a27", fontWeight: 700, fontSize: 22 }}>
           your house details
         </h2>
@@ -114,6 +100,6 @@ export default function InfoPage({ address, onSubmit }) {
           </button>
         </div>
       </div>
-    </div>
+    </PageCard>
   );
 }

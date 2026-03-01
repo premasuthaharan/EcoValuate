@@ -1,5 +1,6 @@
 export const MOCK_SUGGESTIONS = [
   "123 Main St, San Francisco, CA 94105",
+  "67 Sixty-Seventh Ave, New York, NY 6767",
   "456 Oak Ave, Los Angeles, CA 90001",
   "789 Pine Rd, Seattle, WA 98101",
   "321 Elm St, Austin, TX 73301",
@@ -10,7 +11,8 @@ export const MOCK_SUGGESTIONS = [
 ];
 
 export const BG_URL = "/bg1.png";
-export const BG_URL2 = "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80";
+export const BG_URL2 = "/bg2.png";
+export const BG_URL3 = "/bg3.png";
 
 export const inputStyle = {
   padding: "8px 10px",
