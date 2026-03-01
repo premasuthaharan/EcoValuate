@@ -1,5 +1,6 @@
+import { useState } from "react";
 import AddressSearch from "../components/AddressSearch";
-import { BG_URL } from "../constants";
+import { BG_URL, ACCENT_COLOR } from "../constants";
 
 const clouds = [
   { top: "-5vh", left: "35vw", width: "22vw", opacity: 0.85 },
@@ -7,6 +8,8 @@ const clouds = [
 ];
 
 export default function StartPage({ onGo }) {
+  const [query, setQuery] = useState("");
+
   return (
     <div style={{
       width: "100vw", height: "100vh", position: "relative",
@@ -22,7 +25,6 @@ export default function StartPage({ onGo }) {
         }
       `}</style>
       <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.15)" }} />
-      {/* Radial blur mask: blurs centre, fades to sharp at edges */}
       <div style={{
         position: "absolute", inset: 0,
         backdropFilter: "blur(2px)",
@@ -50,31 +52,48 @@ export default function StartPage({ onGo }) {
         />
       ))}
       <div style={{
-        position: "relative", textAlign: "center",
+        position: "relative",
         display: "flex", flexDirection: "column", alignItems: "center", gap: 24,
         marginTop: -180,
+        width: 500,
       }}>
         <h1 style={{
-            fontFamily: "var(--font-brand)",
-            fontSize: 70,
-            fontWeight: 800,
-            color: "#111",
-            letterSpacing: "-0.03em",
-            margin: 0,
-            }}>
-            EcoValuate
+          fontFamily: "var(--font-brand)",
+          fontSize: 70,
+          fontWeight: 800,
+          color: "#111",
+          letterSpacing: "-0.03em",
+          margin: 0,
+          alignSelf: "center",
+        }}>
+          EcoValuate
         </h1>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-start" }}>
-          <label style={{
-            fontFamily: "var(--font-ui)",
-            fontSize: 25,
-            color: "#333",
-            fontWeight: 500
-            }}>
-            Enter your address
-        </label>
-          <AddressSearch onGo={onGo} />
+
+        {/* Input bubble */}
+        <div style={{
+          width: "100%",
+          background: "rgba(255,255,255,0.72)",
+          backdropFilter: "blur(1px)",
+          WebkitBackdropFilter: "blur(1px)",
+          borderRadius: 16,
+          padding: "20px 24px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+        }}>
+          <AddressSearch query={query} onQueryChange={setQuery} />
         </div>
+
+        {/* Go button */}
+        <button
+          onClick={() => query.trim() && onGo(query)}
+          style={{
+            padding: "13px 36px", paddingLeft: 32,
+            background: ACCENT_COLOR, color: "#fff",
+            border: "none", borderRadius: 28, cursor: "pointer",
+            fontWeight: 600, fontSize: 16,
+            transition: "background 0.2s", whiteSpace: "nowrap",
+            fontFamily: "var(--font-ui)",
+          }}
+        >Go</button>
       </div>
     </div>
   );
