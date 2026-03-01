@@ -5,6 +5,7 @@ import { BG_URL2, inputStyle, ACCENT_COLOR } from "../constants";
 
 export default function InfoPage({ address, loadData, onSubmit, onBack }) {
   const m = loadData?.data?.metadata ?? {};
+  const d = loadData?.data?.derived ?? {};
   const [form, setForm] = useState({
     address: m.address ?? address,
     sqft: m.size_sqft ?? "",
@@ -12,7 +13,7 @@ export default function InfoPage({ address, loadData, onSubmit, onBack }) {
     lat: m.latitude ?? "",
     lon: m.longitude ?? "",
     stories: m.stories ?? "",
-    fuelSource: m.inferred_fuel === "natural_gas" ? "gas" : (["electric", "oil"].includes(m.inferred_fuel) ? m.inferred_fuel : ""),
+    fuelSource: d.inferred_fuel === "natural_gas" ? "gas" : (["electric", "oil"].includes(d.inferred_fuel) ? d.inferred_fuel : ""),
     pool: m.has_pool ?? false,
     solarPanels: m.has_solar ?? false,
   });
@@ -43,11 +44,14 @@ export default function InfoPage({ address, loadData, onSubmit, onBack }) {
       latitude: form.lat,
       longitude: form.lon,
       stories: form.stories,
-      inferred_fuel: form.fuelSource === "gas" ? "natural_gas" : form.fuelSource,
       has_pool: form.pool,
       has_solar: form.solarPanels,
     };
-    const updatedHomeData = { ...loadData.data, metadata: updatedMetadata };
+    const updatedDerived = {
+      ...loadData.data.derived,
+      inferred_fuel: form.fuelSource === "gas" ? "natural_gas" : form.fuelSource,
+    };
+    const updatedHomeData = { ...loadData.data, metadata: updatedMetadata, derived: updatedDerived };
 
     const estimateJson = await fetch("http://127.0.0.1:2000/api/estimate", {
       method: "POST",
