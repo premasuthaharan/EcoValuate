@@ -1,52 +1,93 @@
 import { useState } from "react";
-import { BG_URL4, TIMELINE, TREES_PER_STEP, ACCENT_COLOR } from "../constants";
+import { BG_URL4, ACCENT_COLOR } from "../constants";
 
-function YearBubble({ year }) {
-  return (
-    <div style={{
-      width: 100, height: 100, borderRadius: "50%",
-      background: `radial-gradient(circle at 35% 35%, #a0683a, ${ACCENT_COLOR})`,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      color: "#fff", fontWeight: 800, fontSize: 22,
-      fontFamily: "var(--font-ui)",
-      boxShadow: "0 4px 18px rgba(0,0,0,0.25)",
-      border: "3px solid rgba(255,255,255,0.25)",
-      flexShrink: 0,
-    }}>{year}</div>
-  );
+function buildTimeline(plan) {
+  if (!plan?.selected_actions?.length) return [];
+  const currentYear = new Date().getFullYear();
+  const horizon = plan.time_horizon_years ?? 1;
+  const actions = plan.selected_actions;
+  const seqKgPerYear = plan.tree_sequestration_kg_per_year ?? 22;
+  const perYear = Math.ceil(actions.length / horizon);
+  const blocks = [];
+  for (let y = 0; y < horizon; y++) {
+    const slice = actions.slice(y * perYear, (y + 1) * perYear);
+    if (!slice.length) break;
+    blocks.push({
+      year: currentYear + y,
+      steps: slice.map((a, i) => ({
+        id: `${y}-${i}`,
+        text: a.action,
+        co2: a.annual_co2_reduction,
+        trees: a.annual_co2_reduction / seqKgPerYear,
+      })),
+    });
+  }
+  return blocks;
 }
 
-function StepBubble({ step, checked, onToggle }) {
+function YearCard({ block, checked, onToggle }) {
+  const total = block.steps.length;
+  const done  = block.steps.filter(s => checked.has(s.id)).length;
+
   return (
-    <div
-      onClick={() => onToggle(step.id)}
-      style={{
-        width: 110, height: 110, borderRadius: "50%",
-        background: checked ? "rgba(150,150,150,0.5)" : "rgba(255,255,255,0.72)",
-        backdropFilter: "blur(4px)",
-        WebkitBackdropFilter: "blur(4px)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        cursor: "pointer",
-        border: checked ? "2px solid rgba(120,120,120,0.3)" : "2px solid rgba(255,255,255,0.5)",
-        boxShadow: checked ? "none" : "0 4px 20px rgba(0,0,0,0.08)",
-        transition: "all 0.25s ease",
-        padding: 14,
-        textAlign: "center",
-        flexShrink: 0,
-      }}
-    >
+    <div style={{
+      width: "100%",
+      background: "rgba(255,255,255,0.82)",
+      borderRadius: 20,
+      boxShadow: "0 4px 24px rgba(0,0,0,0.09)",
+      border: "1px solid rgba(0,0,0,0.07)",
+    }}>
+      {/* Card header */}
       <div style={{
-        fontSize: 11.5, lineHeight: 1.4,
-        color: checked ? "rgba(60,60,60,0.45)" : "#333",
-        fontWeight: 600,
-        fontFamily: "var(--font-ui)",
-        textDecoration: checked ? "line-through" : "none",
-      }}>{step.text}</div>
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "16px 24px 14px",
+        borderBottom: "1px solid rgba(0,0,0,0.06)",
+      }}>
+        <span style={{
+          fontWeight: 800, fontSize: 22, color: ACCENT_COLOR,
+          fontFamily: "var(--font-ui)", letterSpacing: "-0.01em",
+        }}>{block.year}</span>
+        <span style={{
+          fontSize: 12, fontWeight: 600, color: "#888",
+          fontFamily: "var(--font-ui)",
+        }}>{done > 0 ? `${done} removed` : `${total} action${total !== 1 ? "s" : ""}`}</span>
+      </div>
+
+      {/* Action rows */}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {block.steps.map((step, i) => {
+          const isChecked = checked.has(step.id);
+          return (
+            <div
+              key={step.id}
+              onClick={() => onToggle(step.id)}
+              style={{
+                display: "flex", alignItems: "center", gap: 14,
+                padding: "13px 24px",
+                borderBottom: i < block.steps.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none",
+                cursor: "pointer",
+                background: isChecked ? "rgba(180,60,60,0.04)" : "transparent",
+                transition: "background 0.15s",
+              }}
+            >
+              {/* Action text */}
+              <span style={{
+                fontSize: 14, fontWeight: 500,
+                color: isChecked ? "rgba(0,0,0,0.3)" : "#222",
+                fontFamily: "var(--font-ui)",
+                textDecoration: isChecked ? "line-through" : "none",
+                transition: "all 0.2s",
+                lineHeight: 1.4,
+              }}>{step.text}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-export default function TimelinePage({ onBack, onGraph }) {
+export default function MapPage({ planData, onBack, onGraph }) {
   const [checked, setChecked] = useState(new Set());
   const [backHover, setBackHover] = useState(false);
 
@@ -58,7 +99,13 @@ export default function TimelinePage({ onBack, onGraph }) {
     });
   };
 
-  const treesSaved = checked.size * TREES_PER_STEP;
+  const timeline = buildTimeline(planData);
+  const allSteps = timeline.flatMap(b => b.steps);
+
+  const removedCO2      = allSteps.filter(s => checked.has(s.id)).reduce((sum, s) => sum + s.co2,   0);
+  const removedTrees    = allSteps.filter(s => checked.has(s.id)).reduce((sum, s) => sum + s.trees, 0);
+  const totalCO2        = Math.max(0, (planData?.cumulative_estimated_co2_reduction ?? 0) - removedCO2);
+  const equivalentTrees = Math.max(0, (planData?.equivalent_trees ?? 0) - removedTrees);
 
   return (
     <div style={{
@@ -84,7 +131,7 @@ export default function TimelinePage({ onBack, onGraph }) {
         onMouseEnter={() => setBackHover(true)}
         onMouseLeave={() => setBackHover(false)}
         style={{
-          position: "absolute", top: 15, left: 15, zIndex: 10,
+          position: "absolute", top: 15, left: 15, zIndex: 20,
           background: "none", border: "none",
           color: backHover ? "#2d5a27" : "#4a7c59",
           fontWeight: 900, fontSize: 20, cursor: "pointer",
@@ -93,6 +140,30 @@ export default function TimelinePage({ onBack, onGraph }) {
         }}
       >← Back</button>
 
+      {/* Sticky summary bubble */}
+      {planData && (
+        <div style={{
+          position: "absolute", top: 16, left: "50%", transform: "translateX(-50%)", zIndex: 10,
+          background: "rgba(255,255,255,0.82)",
+          backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+          borderRadius: 99,
+          border: "1px solid rgba(0,0,0,0.07)",
+          padding: "10px 28px",
+          display: "flex", gap: 24, flexWrap: "nowrap", alignItems: "center",
+          fontSize: 14, color: "#444",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.10)",
+          whiteSpace: "nowrap",
+        }}>
+          <span><b style={{ color: ACCENT_COLOR }}>${planData.budget_usd?.toLocaleString()}</b> budget</span>
+          <span style={{ color: "rgba(0,0,0,0.2)" }}>·</span>
+          <span><b style={{ color: ACCENT_COLOR }}>{planData.time_horizon_years}</b> yr{planData.time_horizon_years !== 1 ? "s" : ""}</span>
+          <span style={{ color: "rgba(0,0,0,0.2)" }}>·</span>
+          <span><b style={{ color: ACCENT_COLOR }}>{Math.round(totalCO2).toLocaleString()} kg</b> CO₂</span>
+          <span style={{ color: "rgba(0,0,0,0.2)" }}>·</span>
+          <span><b style={{ color: ACCENT_COLOR }}>{equivalentTrees.toFixed(1)}</b> trees</span>
+        </div>
+      )}
+
       {/* Scrollable content */}
       <div style={{
         position: "relative", zIndex: 1,
@@ -100,39 +171,41 @@ export default function TimelinePage({ onBack, onGraph }) {
         overflowY: "auto",
         display: "flex", flexDirection: "column",
         alignItems: "center",
-        padding: "72px 20px 60px",
+        padding: "80px 24px 60px",
         boxSizing: "border-box",
-        gap: 20,
+        gap: 16,
       }}>
         <h2 style={{ margin: "0 0 8px", color: "#111", fontWeight: 800, fontSize: 36, letterSpacing: "-0.02em" }}>
           Your Plan
         </h2>
 
-        {TIMELINE.map((block) => (
-          <div key={block.year} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-            <YearBubble year={block.year} />
-            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 16 }}>
-              {block.steps.map(step => (
-                <StepBubble key={step.id} step={step} checked={checked.has(step.id)} onToggle={toggle} />
-              ))}
-            </div>
-          </div>
-        ))}
+        <div style={{
+          display: "grid", gridTemplateColumns: "1fr 1fr",
+          gap: 16, width: "100%", maxWidth: 1000,
+        }}>
+          {timeline.map(block => (
+            <YearCard
+              key={block.year}
+              block={block}
+              checked={checked}
+              onToggle={toggle}
+            />
+          ))}
+        </div>
 
-        {/* Trees saved bubble */}
+        {/* Trees equivalent */}
         <div style={{
           marginTop: 8,
           background: "rgba(255,255,255,0.72)",
           backdropFilter: "blur(1px)",
           WebkitBackdropFilter: "blur(1px)",
           borderRadius: 99,
-          padding: "16px 32px",
-          fontSize: 16, fontWeight: 700,
+          padding: "14px 28px",
+          fontSize: 15, fontWeight: 700,
           color: "#333",
           boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-          textAlign: "center",
         }}>
-          you would save <span style={{ fontSize: 22, color: ACCENT_COLOR }}>{treesSaved}</span> trees
+          equivalent to <span style={{ fontSize: 20, color: ACCENT_COLOR }}>{equivalentTrees.toFixed(1)}</span> trees planted
         </div>
 
         {/* View graphs button */}
