@@ -25,7 +25,7 @@ export default function App() {
 
   if (page === "start") return <StartPage onGo={handleGo} />;
   if (page === "info") return <InfoPage address={address} loadData={loadData} onSubmit={(d, past, updatedHomeData) => { setFormData(d); setLoadData(prev => ({ ...prev, data: { ...updatedHomeData, past } })); setPage("score"); }} onBack={() => setPage("start")} />;
-  if (page === "score") return <ScorePage formData={formData} onPlanGenerate={inputs => { setPlanData(inputs); setPage("map"); }} onBack={() => setPage("info")} />;
+  if (page === "score") return <ScorePage formData={formData} loadData={loadData} onPlanGenerate={future => { const next = { ...loadData, data: { ...loadData.data, future } }; setPlanData(future); setLoadData(next); setPage("map"); }} onBack={() => setPage("info")} />;
   if (page === "map") return <MapPage planData={planData} onBack={() => setPage("score")} onGraph={() => setPage("graph")} />;
   if (page === "graph") return <GraphPage loadData={loadData} onBack={() => setPage("map")} />;
 }

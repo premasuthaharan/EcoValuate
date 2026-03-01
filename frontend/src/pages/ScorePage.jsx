@@ -3,9 +3,6 @@ import { BG_URL3 } from "../constants";
 import ScoreSlider from "../components/ScoreSlider";
 import PlanInputs from "../components/PlanInputs";
 
-// TODO Placeholder score
-const PLACEHOLDER_SCORE = 72;
-
 const getEmoji = (score) => {
   if (score >= 80) return { face: "😄", label: "Excellent" };
   if (score >= 60) return { face: "🙂", label: "Good" };
@@ -14,8 +11,8 @@ const getEmoji = (score) => {
   return { face: "😢", label: "Critical" };
 };
 
-export default function ScorePage({ onPlanGenerate, onBack }) {
-  const score = PLACEHOLDER_SCORE; // swap this out for a prop or context value
+export default function ScorePage({ loadData, onPlanGenerate, onBack }) {
+  const score = loadData?.data?.past?.eco_score ?? 40;
   const [budget, setBudget] = useState("");
   const [years, setYears] = useState("");
   const [priority, setPriority] = useState("");
@@ -41,7 +38,7 @@ export default function ScorePage({ onPlanGenerate, onBack }) {
 
   const { face, label } = getEmoji(animatedScore);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     const errs = {};
     if (!budget || isNaN(budget) || Number(budget) <= 0)
       errs.budget = "Enter a valid budget";
@@ -51,9 +48,20 @@ export default function ScorePage({ onPlanGenerate, onBack }) {
       errs.priority = "Select a priority";
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setErrors({});
-    const inputs = { budget: Number(budget), years: Number(years), priority, score };
-    console.log("User inputs saved:", inputs);
-    if (onPlanGenerate) onPlanGenerate(inputs);
+
+    const planJson = await fetch("http://127.0.0.1:2000/api/plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        budget: Number(budget),
+        horizon: Number(years),
+        plan_type: priority,
+        home_data: loadData.data,
+      }),
+    }).then(res => res.json());
+
+    console.log("planJson:", planJson);
+    if (onPlanGenerate) onPlanGenerate(planJson.plan);
   };
 
   return (
@@ -116,7 +124,7 @@ export default function ScorePage({ onPlanGenerate, onBack }) {
           padding: "28px 32px",
           boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
         }}>
-          <ScoreSlider animatedScore={animatedScore} />
+          <ScoreSlider animatedScore={animatedScore} score={score} />
         </div>
 
         <PlanInputs

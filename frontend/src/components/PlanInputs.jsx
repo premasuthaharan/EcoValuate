@@ -61,11 +61,10 @@ export default function PlanInputs({ budget, years, priority, errors, onBudgetCh
               color: priority ? "rgb(51,51,51)" : "rgb(118,118,118)",
             }}
           >
-            <option value="" disabled>Priority</option>
-            <option value="cost">Cost savings</option>
-            <option value="emissions">Emissions reduction</option>
-            <option value="comfort">Home comfort</option>
-            <option value="resilience">Resilience</option>
+            <option value="" disabled>Plan Type</option>
+            <option value="fastest payback">Fastest payback</option>
+            <option value="max co2 reduction">Max CO2 reduction</option>
+            <option value="balanced">Balanced</option>
           </select>
           <span style={{
             position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
