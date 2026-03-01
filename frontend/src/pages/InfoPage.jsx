@@ -22,7 +22,7 @@ export default function InfoPage({ address, loadData, onSubmit, onBack }) {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const errs = {};
     if (!form.address.trim()) errs.address = "Address is required.";
     if (!form.sqft) errs.sqft = "Square footage is required.";
@@ -34,7 +34,28 @@ export default function InfoPage({ address, loadData, onSubmit, onBack }) {
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setErrors({});
     setSubmitted(true);
-    onSubmit(form);
+
+    const updatedMetadata = {
+      ...loadData.data.metadata,
+      address: form.address,
+      size_sqft: form.sqft,
+      year_built: form.yearBuilt,
+      latitude: form.lat,
+      longitude: form.lon,
+      stories: form.stories,
+      inferred_fuel: form.fuelSource === "gas" ? "natural_gas" : form.fuelSource,
+      has_pool: form.pool,
+      has_solar: form.solarPanels,
+    };
+    const updatedHomeData = { ...loadData.data, metadata: updatedMetadata };
+
+    const estimateJson = await fetch("http://127.0.0.1:2000/api/estimate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ home_data: updatedHomeData }),
+    }).then(res => res.json());
+
+    onSubmit(form, estimateJson.data, updatedHomeData);
   };
 
   return (
