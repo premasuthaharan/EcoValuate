@@ -162,8 +162,6 @@ export default function GraphPage({ onBack, loadData }) {
   const [backHover, setBackHover] = useState(false);
 
   // Popup data
-  const updatedScore = future?.carbon_score_update?.updated_eco_score;
-  const scoreDelta = updatedScore != null && baseScore != null ? Math.round(updatedScore - baseScore) : null;
   const percentReduction = future?.carbon_score_update?.percent_reduction;
   const annualCO2 = future?.total_estimated_annual_co2_reduction;
   const horizonYears = future?.time_horizon_years ?? 10;
@@ -173,6 +171,12 @@ export default function GraphPage({ onBack, loadData }) {
   const annualSavings = improvedProj
     ? (baselineProj[horizonIdx]?.cost ?? 0) - (improvedProj[horizonIdx]?.cost ?? 0)
     : null;
+  // Compare year-15 endpoints of each projection — shows actual long-term divergence
+  const _baselineEnd = baseScore != null ? buildProjection(baseScore, loadData)[15].score : null;
+  const _improvedEnd = baseScore != null && future != null ? buildImprovedProjection(baseScore, future, loadData)?.[15]?.score : null;
+  const baselineEnd = _baselineEnd;
+  const improvedEnd = _improvedEnd;
+  const scoreDelta = baselineEnd != null && improvedEnd != null ? improvedEnd - baselineEnd : null;
 
   const tabs = [
     { id: "footprint", label: "Expected Footprint" },
@@ -395,10 +399,10 @@ export default function GraphPage({ onBack, loadData }) {
 
                 {/* Eco Score */}
                 <div style={popupRow}>
-                  <span style={popupLabel}>Eco Score</span>
+                  <span style={popupLabel}>Eco Score (yr 15)</span>
                   <span style={popupValue}>
-                    {baseScore} <span style={{ color: "#aaa" }}>→</span>{" "}
-                    <strong style={{ color: "#2E7D32" }}>{updatedScore ?? "—"}</strong>
+                    {baselineEnd ?? "—"} <span style={{ color: "#aaa" }}>→</span>{" "}
+                    <strong style={{ color: "#2E7D32" }}>{improvedEnd ?? "—"}</strong>
                     {scoreDelta != null && (
                       <span style={{ color: scoreDelta >= 0 ? "#2E7D32" : "#c0392b", fontSize: 12, marginLeft: 6 }}>
                         ({scoreDelta >= 0 ? "+" : ""}{scoreDelta} pts)
