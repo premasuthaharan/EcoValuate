@@ -16,8 +16,8 @@ export default function ResultsPage({ data }) {
         padding: "40px 48px", textAlign: "center",
         boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
       }}>
-        <div style={{ fontSize: 48, marginBottom: 12 }}>🌿</div>
-        <h2 style={{ color: "#2d5a27", fontWeight: 700, fontSize: 24, margin: "0 0 8px" }}>Results Coming Soon</h2>
+        <div style={{ fontSize: 46, marginBottom: 12 }}>🌿</div>
+        <h2 style={{ color: "#2d5a27", fontWeight: 700, fontSize: 26, margin: "0 0 8px" }}>Results Coming Soon</h2>
         <p style={{ color: "#555", fontSize: 14, margin: "0 0 4px" }}>Your data has been logged successfully.</p>
         <p style={{ color: "#888", fontSize: 12 }}>This page will display your EcoValuate score.</p>
         <pre style={{
